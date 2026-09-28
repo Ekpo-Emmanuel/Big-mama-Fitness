@@ -1,4 +1,16 @@
 import { analyticsAttribution, getAttribution } from "./attribution";
+
+const GTM_ID_RE = /^GTM-[A-Z0-9]+$/;
+const GA_ID_RE = /^G-[A-Z0-9]+$/;
+
+export function isValidGtmId(id: string | undefined): id is string {
+  return !!id && GTM_ID_RE.test(id);
+}
+
+export function isValidGaMeasurementId(id: string | undefined): id is string {
+  return !!id && GA_ID_RE.test(id);
+}
+
 export type BrowserEvent =
   | "page_view"
   | "reserve_spot_click"
