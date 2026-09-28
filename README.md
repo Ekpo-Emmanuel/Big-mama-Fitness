@@ -192,14 +192,16 @@ registration_submit
 checkout_start
 sold_out_view
 future_event_lead_submit
+feedback_page_view
+feedback_submitted
 ```
 
-`purchase` is sent only by the confirmed-payment job, never by a success-page visit. It includes a stable Stripe transaction ID, CAD currency, value 10 for the initial event, and one event-ticket item. The unique job prevents normal duplicate processing; GA4's transaction identifier supports deduplication of ambiguous delivery retries. External delivery is not a mathematically exact-once network guarantee.
+`purchase` is sent only by the confirmed-payment job (Measurement Protocol), never by a success-page visit. It includes a stable Stripe payment-intent ID as `transaction_id`, currency, value, and one event-ticket item. Webhook receipt + sold-transition gate + unique job id prevent normal duplicate processing; GA4's transaction identifier supports deduplication of ambiguous delivery retries. External delivery is not a mathematically exact-once network guarantee.
 
-Set `NEXT_PUBLIC_GTM_ID` and `NEXT_PUBLIC_GA_MEASUREMENT_ID`. In GTM:
+Set `NEXT_PUBLIC_GTM_ID` and `NEXT_PUBLIC_GA_MEASUREMENT_ID` on Vercel Production (values only — no `KEY=` prefix). In GTM:
 
-1. Configure the Google tag for your GA4 web stream.
-2. Disable automatic page-view sending and enhanced-measurement form/history events that would duplicate these explicit events.
+1. Configure the Google tag for your GA4 web stream (`NEXT_PUBLIC_GA_MEASUREMENT_ID`).
+2. Disable automatic page-view sending and enhanced-measurement form/history events that would duplicate these explicit `page_view` dataLayer events.
 3. Create Data Layer Variables for `event_id`, `event_name`, `ticket_price`, `currency`, `spots_remaining`, the four UTM keys, `page_location`, `client_id`, and `session_id`.
 4. Set the Google tag client ID from the `client_id` variable so server purchases can correlate with the browser.
 5. Trigger GA4 event tags for the listed custom events. Use the supplied clean `page_location`; do not send raw URL queries, confirmation tokens, form fields, names, phones, or emails.
@@ -208,13 +210,15 @@ Set `NEXT_PUBLIC_GTM_ID` and `NEXT_PUBLIC_GA_MEASUREMENT_ID`. In GTM:
 
 If GTM is absent, the GA4 ID enables a direct Google tag fallback. Both are never installed as competing tag loaders.
 
-Create a Measurement Protocol API secret for the same web stream and put it in server-only `GA_API_SECRET` on the Convex deployment. A scheduled Convex action delivers the purchase event after paid confirmation. Verify payloads against Google's validation endpoint before launch; a successful collect HTTP response alone does not prove correct GA4 reporting. See [Google's Measurement Protocol guide](https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events).
+Create a Measurement Protocol API secret for the same web stream and put it in server-only `GA_API_SECRET` on the **Convex production** deployment (`npx convex env set --prod GA_API_SECRET …`). Also set `NEXT_PUBLIC_GA_MEASUREMENT_ID` on Convex prod for `purchaseAction`. Without both, purchase jobs skip analytics delivery. Verify payloads against Google's validation endpoint before launch; a successful collect HTTP response alone does not prove correct GA4 reporting. See [Google's Measurement Protocol guide](https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events).
 
 First-touch UTMs persist for 30 days in browser storage and are copied to attendee or lead records. Values use letters, digits, underscores, and hyphens. Analytics forwards only campaign values defined in `lib/attribution.ts`; add new approved campaign values there. This prevents arbitrary URL input from entering analytics. Storage-blocked browsers retain attribution within the current app session, but full cross-page persistence cannot be guaranteed without browser storage.
 
 Example links:
 
 ```text
+https://www.bigmamafit.ca/?utm_source=instagram&utm_medium=social&utm_campaign=october17&utm_content=reel1
+https://www.bigmamafit.ca/?utm_source=poster&utm_medium=qr&utm_campaign=october17&utm_content=gym
 /event/afro-dance-fitness?utm_source=poster&utm_medium=qr&utm_campaign=october17&utm_content=gym_lobby
 /event/afro-dance-fitness?utm_source=instagram&utm_medium=social&utm_campaign=october17&utm_content=profile
 /event/afro-dance-fitness?utm_source=facebook&utm_medium=social&utm_campaign=october17&utm_content=post

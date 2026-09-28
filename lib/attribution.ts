@@ -15,6 +15,12 @@ export const campaigns = {
     utm_campaign: "october17",
     utm_content: "gym_lobby",
   },
+  "poster-gym-short": {
+    utm_source: "poster",
+    utm_medium: "qr",
+    utm_campaign: "october17",
+    utm_content: "gym",
+  },
   "poster-workplace": {
     utm_source: "poster",
     utm_medium: "qr",
@@ -32,6 +38,12 @@ export const campaigns = {
     utm_medium: "social",
     utm_campaign: "october17",
     utm_content: "profile",
+  },
+  "instagram-reel": {
+    utm_source: "instagram",
+    utm_medium: "social",
+    utm_campaign: "october17",
+    utm_content: "reel1",
   },
   facebook: {
     utm_source: "facebook",

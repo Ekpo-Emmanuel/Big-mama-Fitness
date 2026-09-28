@@ -51,9 +51,10 @@ export function trackEvent(name: BrowserEvent, properties: Properties = {}) {
   };
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({ event: name, ...safe });
+  // Direct gtag only when GTM is not the active loader.
   if (
-    !process.env.NEXT_PUBLIC_GTM_ID &&
-    process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+    !isValidGtmId(process.env.NEXT_PUBLIC_GTM_ID) &&
+    isValidGaMeasurementId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID)
   ) {
     window.gtag =
       window.gtag ||

@@ -27,6 +27,34 @@ test("attribution rejects contact-like values and analytics only forwards known 
     { utm_medium: "qr" },
   );
   assert.equal(result.client_id, "123.456");
+  assert.deepEqual(
+    analyticsAttribution({
+      utm_source: "instagram",
+      utm_medium: "social",
+      utm_campaign: "october17",
+      utm_content: "reel1",
+    }),
+    {
+      utm_source: "instagram",
+      utm_medium: "social",
+      utm_campaign: "october17",
+      utm_content: "reel1",
+    },
+  );
+  assert.deepEqual(
+    analyticsAttribution({
+      utm_source: "poster",
+      utm_medium: "qr",
+      utm_campaign: "october17",
+      utm_content: "gym",
+    }),
+    {
+      utm_source: "poster",
+      utm_medium: "qr",
+      utm_campaign: "october17",
+      utm_content: "gym",
+    },
+  );
 });
 test("analytics session expires separately from first-touch campaign attribution", () => {
   const now = 2000000000000;

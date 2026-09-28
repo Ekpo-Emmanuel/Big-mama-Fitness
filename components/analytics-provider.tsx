@@ -9,6 +9,15 @@ import {
 } from "@/lib/analytics";
 import { getAttribution } from "@/lib/attribution";
 
+function shouldTrackPath(pathname: string) {
+  return !(
+    pathname === "/login" ||
+    pathname.startsWith("/login/") ||
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/")
+  );
+}
+
 export function AnalyticsProvider() {
   const pathname = usePathname();
   const last = useRef("");
@@ -33,6 +42,7 @@ export function AnalyticsProvider() {
         client_id: getAttribution().client_id,
       });
     }
+    if (!shouldTrackPath(pathname)) return;
     if (last.current !== pathname) {
       last.current = pathname;
       trackEvent("page_view");
