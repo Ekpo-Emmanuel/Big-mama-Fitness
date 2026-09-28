@@ -60,7 +60,8 @@ export function checkoutSessionParams(
     ],
     expires_at: row.expires_at,
     success_url: `${siteUrl()}/event/${event.slug}/success?token=${row.confirmation_token}`,
-    cancel_url: `${siteUrl()}/event/${event.slug}/register?cancelled=1`,
+    // Carry requestKey back: sessionStorage can be cleared after Stripe redirect.
+    cancel_url: `${siteUrl()}/event/${event.slug}/register?cancelled=1&rk=${encodeURIComponent(row.request_key)}`,
   };
 }
 export function stripeClient() {

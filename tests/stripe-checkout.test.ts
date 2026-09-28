@@ -15,6 +15,7 @@ const row = {
   currency: "CAD",
   expires_at: 1_800_000_000,
   confirmation_token: "secret-token",
+  request_key: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
 } as Attendee;
 
 test("checkout product copy uses event schedule and city, not attendee data", () => {
@@ -84,4 +85,30 @@ test("checkout session params brand hosted Checkout without changing payment mod
   const submit = params.custom_text?.submit;
   const message = submit && typeof submit === "object" ? submit.message : "";
   assert.equal(message?.includes("confirmed"), true);
+  assert.match(
+    params.cancel_url || "",
+    /\/event\/afro-dance-fitness\/register\?cancelled=1&rk=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee$/,
+  );
+});
+
+test("cancel_url never uses apex host when APP_URL is www", () => {
+  const previous = process.env.APP_URL;
+  process.env.APP_URL = "https://www.bigmamafit.ca";
+  try {
+    const params = checkoutSessionParams(initialEvent, row);
+    assert.equal(
+      params.cancel_url?.startsWith(
+        "https://www.bigmamafit.ca/event/afro-dance-fitness/register?cancelled=1&rk=",
+      ),
+      true,
+    );
+    assert.equal(params.cancel_url?.includes("https://bigmamafit.ca/"), false);
+    assert.equal(
+      params.success_url?.startsWith("https://www.bigmamafit.ca/event/"),
+      true,
+    );
+  } finally {
+    if (previous === undefined) delete process.env.APP_URL;
+    else process.env.APP_URL = previous;
+  }
 });

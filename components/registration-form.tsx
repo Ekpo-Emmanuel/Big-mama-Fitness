@@ -2,10 +2,12 @@
 import { useState, useRef, useEffect, type FormEvent } from "react";
 import { getAttribution } from "@/lib/attribution";
 import {
+  adoptCheckoutRequestKey,
   checkoutRequestKey,
   clearActiveRegistration,
   isRegistrationCompleteError,
   registrationDraftKey,
+  REQUEST_KEY_QUERY,
 } from "@/lib/checkout-attempt";
 import { trackEvent } from "@/lib/analytics";
 import type { DanceEvent } from "@/lib/event";
@@ -38,6 +40,11 @@ export function RegistrationForm({
     const form = formRef.current;
     if (!form) return;
     try {
+      // Stripe cancel_url returns ?rk= — adopt before reading sessionStorage.
+      const params = new URLSearchParams(window.location.search);
+      const fromCancel = params.get(REQUEST_KEY_QUERY);
+      if (fromCancel) adoptCheckoutRequestKey(event.id, fromCancel);
+
       const activeKey = checkoutRequestKey(event.id);
       const raw = sessionStorage.getItem(registrationDraftKey(event.id));
       if (!raw) return;

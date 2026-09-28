@@ -17,6 +17,7 @@ export default defineConfig({
       "tests/stripe-checkout.test.ts",
       "tests/event-purchase.test.ts",
       "tests/registration-intent.test.ts",
+      "tests/checkout-attempt.test.ts",
       "tests/dev-email-schedule.test.ts",
       "tests/feedback.test.ts",
     ],
