@@ -16,11 +16,18 @@ export default async function AdminLayout({
   await fetchAuthMutation(api.events.ensureSeeded, {});
   return (
     <>
-      <header className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-6">
-        <Link href="/admin" className="font-bold">
-          Organizer dashboard
-        </Link>
-        <SignOutButton />
+      <header className="border-b border-ink/10 bg-cream">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+          <Link href="/admin" className="min-w-0">
+            <span className="block font-display text-xl uppercase tracking-wide">
+              Big Mama Fitness
+            </span>
+            <span className="block text-xs text-ink/65">
+              Organizer workspace
+            </span>
+          </Link>
+          <SignOutButton />
+        </div>
       </header>
       <main id="main">{children}</main>
     </>

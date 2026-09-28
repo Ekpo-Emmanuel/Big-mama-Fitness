@@ -7,17 +7,27 @@ const WAIVER_TITLE = "Participation Waiver and Assumption of Risk";
 export function WaiverAcceptance({
   text,
   version,
+  error,
+  onAcceptedChange,
 }: {
   text: string;
   version: string;
+  error?: string;
+  onAcceptedChange?: (accepted: boolean) => void;
 }) {
   const formId = useId();
   const titleId = useId();
   const labelId = useId();
+  const errorId = useId();
   const [accepted, setAccepted] = useState(false);
   const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  function updateAccepted(next: boolean) {
+    setAccepted(next);
+    onAcceptedChange?.(next);
+  }
 
   useLayoutEffect(() => {
     const dialog = dialogRef.current;
@@ -37,40 +47,47 @@ export function WaiverAcceptance({
   }
 
   function acceptAndContinue() {
-    setAccepted(true);
+    updateAccepted(true);
     requestClose();
   }
 
   return (
     <>
-      <div
-        className="flex min-h-12 items-start gap-3 text-sm leading-relaxed"
-        data-waiver-version={version}
-      >
-        <input
-          id={formId}
-          name="waiverAccepted"
-          type="checkbox"
-          required
-          checked={accepted}
-          aria-labelledby={labelId}
-          onChange={(event) => setAccepted(event.target.checked)}
-          className="mt-1 size-5 shrink-0 accent-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-        />
-        <p id={labelId}>
-          I have read and agree to the{" "}
-          <button
-            ref={triggerRef}
-            type="button"
-            aria-haspopup="dialog"
-            aria-expanded={open}
-            className="font-bold text-ink underline decoration-orange decoration-2 underline-offset-2 hover:text-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-            onClick={() => setOpen(true)}
-          >
-            {WAIVER_TITLE}
-          </button>
-          .
-        </p>
+      <div data-waiver-version={version}>
+        <div className="flex min-h-12 items-start gap-3 text-sm leading-relaxed">
+          <input
+            id={formId}
+            name="waiverAccepted"
+            type="checkbox"
+            checked={accepted}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? errorId : undefined}
+            aria-labelledby={labelId}
+            onChange={(event) => updateAccepted(event.target.checked)}
+            className={`mt-1 size-5 shrink-0 accent-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
+              error ? "outline outline-2 outline-offset-1 outline-red-700" : ""
+            }`}
+          />
+          <p id={labelId}>
+            I have read and agree to the{" "}
+            <button
+              ref={triggerRef}
+              type="button"
+              aria-haspopup="dialog"
+              aria-expanded={open}
+              className="font-bold text-ink underline decoration-orange decoration-2 underline-offset-2 hover:text-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+              onClick={() => setOpen(true)}
+            >
+              {WAIVER_TITLE}
+            </button>
+            .
+          </p>
+        </div>
+        {error ? (
+          <p id={errorId} role="alert" className="mt-2 text-sm font-normal text-red-800">
+            {error}
+          </p>
+        ) : null}
       </div>
       {open ? (
         <dialog

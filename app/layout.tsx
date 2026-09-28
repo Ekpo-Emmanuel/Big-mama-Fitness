@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import Script from "next/script";
@@ -16,17 +16,24 @@ const sansFont = Inter({
 });
 import "./globals.css";
 import { siteUrl } from "@/lib/http";
+import { siteShareMetadata } from "@/lib/seo";
+import { initialEvent } from "@/lib/event";
 import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { isValidGtmId } from "@/lib/analytics";
 import { getToken } from "@/lib/auth-server";
 
+const cream = "#fff9ef";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   verification: { google: process.env.GOOGLE_SITE_VERIFICATION },
-  title: "Big Mama Fitness",
-  description:
-    "Big Mama Fitness. A beginner-friendly Afro Dance Fitness experience with Brenda in Nanaimo.",
+  ...siteShareMetadata(initialEvent),
+};
+
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: cream,
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
@@ -41,6 +48,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${displayFont.variable} ${sansFont.variable} h-full antialiased`}
+      style={{ colorScheme: "light" }}
     >
       <body className="min-h-full bg-cream font-sans text-ink selection:bg-sun">
         {isValidGtmId(gtmId) ? (

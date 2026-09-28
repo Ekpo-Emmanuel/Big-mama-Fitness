@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Never activate dark: from OS preference. Class strategy unused. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-cream: #fff9ef;
   --color-ink: #321b39;
@@ -10,4 +13,36 @@
   --font-display:
     var(--font-display-face), Impact, "Arial Narrow", var(--font-sans-face),
     sans-serif;
+}
+
+:root {
+  color-scheme: light only;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+}
+
+html {
+  color-scheme: light only;
+}
+
+body {
+  color-scheme: light only;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+}
+
+/* Keep native controls light when the OS is dark. */
+input,
+textarea,
+select,
+button {
+  color-scheme: light;
+}
+
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-ink);
+  box-shadow: 0 0 0 1000px #fff inset;
+  transition: background-color 99999s ease-in-out 0s;
 }

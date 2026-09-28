@@ -173,7 +173,7 @@ test("admin auth, export, and one-tap check-in", async ({ page, request }) => {
   await expect(page).toHaveURL(/\/admin$/);
   await page.goto("/admin/events/e2e-admin/check-in");
   await page.getByRole("button", { name: "Check in", exact: true }).click();
-  await expect(page.getByText("checked in · Payment: paid")).toBeVisible();
+  await expect(page.locator("article").getByText("Checked in", { exact: true })).toBeVisible();
   const response = await page.request.get(
     "/api/admin/events/e2e-admin/export?kind=guests",
   );

@@ -1,16 +1,30 @@
+import type { Attendee } from "@/lib/booking";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import { getEvent } from "@/lib/db";
-import type { Attendee } from "@/lib/booking";
 import { api } from "@/lib/convex";
 import {
   FEEDBACK_SENTIMENT_LABELS,
   type FeedbackSentiment,
 } from "@/lib/feedback";
 import { AdminGuests } from "@/components/admin-guests";
-import { Section } from "@/components/ui";
+import { AdminCheckIn } from "@/components/admin-check-in";
+import { adminGuest } from "@/lib/admin-guest";
+import { AdminLeads } from "@/components/admin-leads";
+import {
+  AdminPage,
+  Metric,
+  Detail,
+  EmptyState,
+  StatusBadge,
+  adminPanel,
+  adminSecondary,
+  formatAmount,
+  formatDate,
+} from "@/components/admin-ui";
+import { eventDateFull, eventTime } from "@/lib/event";
 
 type FeedbackSummary = {
   count: number;
@@ -30,7 +44,6 @@ type FeedbackSummary = {
     updatedAt: string;
   }[];
 };
-
 export default async function EventView({
   params,
 }: {
@@ -39,183 +52,241 @@ export default async function EventView({
   await requireAdmin();
   const { id, view } = await params;
   const event = await getEvent(id);
-  if (!event || !["guests", "leads", "check-in", "feedback"].includes(view))
+  if (
+    !event ||
+    !["guests", "leads", "check-in", "feedback", "details"].includes(view)
+  )
     notFound();
-  const leads: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone: string;
-    marketing_consent: number;
-    marketing_consent_at: string | null;
-    attribution: string;
-    created_at: string;
-  }[] =
-    view === "leads"
-      ? await fetchAuthQuery(api.leads.list, { eventId: id })
-      : [];
-  const guests: Attendee[] =
-    view === "guests" || view === "check-in"
-      ? await fetchAuthQuery(api.booking.listGuests, { eventId: id })
-      : [];
-  const pendingGuests: Attendee[] =
-    view === "guests"
-      ? await fetchAuthQuery(api.booking.listPendingCheckouts, { eventId: id })
-      : [];
-  let feedback: FeedbackSummary | null = null;
-  if (view === "feedback") {
-    feedback = (await fetchAuthQuery(api.feedback.listForEvent, {
+  const titles: Record<string, string> = {
+    guests: "Guests",
+    leads: "Future-event leads",
+    "check-in": "Check-in",
+    feedback: "Guest feedback",
+    details: "Event details",
+  };
+  const descriptions: Record<string, string> = {
+    guests:
+      "Confirmed guests first. Keep incomplete checkouts and cancelled registrations in their own view.",
+    leads:
+      "People interested in future classes. This is not a cancellation waitlist; no seats are automatically offered.",
+    "check-in": "Find your guest. Tap check in. Welcome them in.",
+    feedback:
+      "What your guests enjoyed, and what could make the next class better.",
+    details: "Your published event information and registration setup.",
+  };
+  let content;
+  if (view === "details") {
+    content = (
+      <div className="grid gap-5 lg:grid-cols-2">
+        <section className={adminPanel}>
+          <h2 className="text-lg font-semibold">The event</h2>
+          <dl className="mt-5 grid gap-5 sm:grid-cols-2">
+            <Detail label="Event name">{event.name}</Detail>
+            <Detail label="Instructor">{event.instructorName}</Detail>
+            <Detail label="Date">{eventDateFull(event)}</Detail>
+            <Detail label="Event time">
+              {eventTime(event)}–{eventTime(event, event.endsAt)}
+            </Detail>
+            <Detail label="Workout">
+              {eventTime(event, event.workoutStartsAt)}–
+              {eventTime(event, event.workoutEndsAt)}
+            </Detail>
+            <Detail label="Timezone">{event.timezone}</Detail>
+            <Detail label="Location">
+              {[
+                event.venueName,
+                event.addressLine1,
+                event.city,
+                event.province,
+                event.postalCode,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+            </Detail>
+            <Detail label="Contact email">
+              {event.contactEmail || "Not set"}
+            </Detail>
+          </dl>
+        </section>
+        <section className={adminPanel}>
+          <h2 className="text-lg font-semibold">Registration</h2>
+          <dl className="mt-5 grid gap-5 sm:grid-cols-2">
+            <Detail label="Ticket price">
+              {formatAmount(event.priceCents, event.currency)} {event.currency}
+            </Detail>
+            <Detail label="Capacity">{event.capacity} tickets</Detail>
+            <Detail label="Publication">
+              <StatusBadge status={event.status} />
+            </Detail>
+            <Detail label="Registration setting">
+              {event.registrationOpen ? "Enabled" : "Disabled"}
+            </Detail>
+          </dl>
+          <p className="mt-5 text-xs leading-relaxed text-ink/65">
+            Availability also depends on the event date, status and remaining
+            inventory. Cancellations and refunds do not reopen seats.
+          </p>
+          <Link
+            href={`/event/${event.slug}`}
+            className={`${adminSecondary} mt-5`}
+          >
+            View public event
+          </Link>
+        </section>
+        <section className={`${adminPanel} lg:col-span-2`}>
+          <h2 className="text-lg font-semibold">Approved waiver</h2>
+          <p className="mt-2 text-sm text-ink/70">
+            Accepted copies remain attached to each guest’s registration.
+          </p>
+          <details className="mt-3">
+            <summary className="cursor-pointer py-3 text-sm font-semibold">
+              Read current waiver · {event.waiverVersion || "Not configured"}
+            </summary>
+            <p className="max-h-80 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed">
+              {event.waiverText || "No waiver configured."}
+            </p>
+          </details>
+        </section>
+        <p className="text-sm leading-relaxed text-ink/70 lg:col-span-2">
+          Need to change event information? Contact your site administrator.
+          These details are read-only here to protect existing bookings.
+        </p>
+      </div>
+    );
+  } else if (view === "feedback") {
+    const feedback = (await fetchAuthQuery(api.feedback.listForEvent, {
       eventId: id,
     })) as FeedbackSummary;
-  }
-  return (
-    <Section>
-      <Link href={`/admin/events/${id}`} className="underline">
-        ← Event overview
-      </Link>
-      <h1 className="my-6 text-3xl font-bold">
-        {view === "leads"
-          ? "Future-event leads"
-          : view === "check-in"
-            ? "Event-day check-in"
-            : view === "feedback"
-              ? "Feedback"
-              : "Guest list"}
-      </h1>
-      {view !== "check-in" && view !== "feedback" && (
-        <a
-          className="inline-block min-h-11 underline"
-          href={`/api/admin/events/${id}/export?kind=${view}`}
-        >
-          Export {view} CSV
-        </a>
-      )}
-      {view === "feedback" && feedback ? (
-        <div className="space-y-8">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl bg-white p-5">
-              <p className="text-sm">Average rating</p>
-              <p className="mt-2 text-3xl font-bold">
-                {feedback.average == null ? "—" : `${feedback.average} / 5`}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white p-5">
-              <p className="text-sm">Responses</p>
-              <p className="mt-2 text-3xl font-bold">{feedback.count}</p>
-            </div>
-            <div className="rounded-2xl bg-white p-5">
-              <p className="text-sm">Response rate</p>
-              <p className="mt-2 text-3xl font-bold">
-                {feedback.responseRate == null
-                  ? "—"
-                  : `${feedback.responseRate}%`}
-              </p>
-              <p className="mt-1 text-xs text-ink/60">
-                of {feedback.eligible} paid guests
-              </p>
-            </div>
-          </div>
-          <div className="rounded-2xl bg-white p-5">
-            <p className="text-sm font-bold">Sentiment</p>
-            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-              {(
-                Object.keys(feedback.sentimentCounts) as FeedbackSentiment[]
-              ).map((key) => (
-                <li key={key} className="flex justify-between gap-3 text-sm">
-                  <span>{FEEDBACK_SENTIMENT_LABELS[key]}</span>
-                  <span className="font-bold">
-                    {feedback.sentimentCounts[key]}
-                  </span>
+    content = (
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <Metric
+            label="Average rating"
+            value={feedback.average == null ? "—" : `${feedback.average} / 5`}
+          />
+          <Metric label="Responses" value={feedback.count} />
+          <Metric
+            label="Response rate"
+            value={
+              feedback.responseRate == null ? "—" : `${feedback.responseRate}%`
+            }
+            detail={`Of ${feedback.eligible} eligible paid guests`}
+          />
+        </div>
+        <section className={adminPanel}>
+          <h2 className="font-semibold">How the class felt</h2>
+          <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+            {(Object.keys(feedback.sentimentCounts) as FeedbackSentiment[]).map(
+              (key) => (
+                <li key={key}>
+                  <div className="mb-2 flex justify-between gap-3 text-sm">
+                    <span>{FEEDBACK_SENTIMENT_LABELS[key]}</span>
+                    <span className="font-semibold tabular-nums">
+                      {feedback.sentimentCounts[key]}
+                    </span>
+                  </div>
+                  <meter
+                    aria-label={FEEDBACK_SENTIMENT_LABELS[key]}
+                    min={0}
+                    max={Math.max(1, feedback.count)}
+                    value={feedback.sentimentCounts[key]}
+                    className="h-3 w-full accent-ink"
+                  />
                 </li>
-              ))}
-            </ul>
-          </div>
-          <div className="space-y-4">
-            {feedback.items.length === 0 && (
-              <p>No feedback submitted yet.</p>
+              ),
             )}
-            {feedback.items.map((item) => (
-              <article
-                key={item.id}
-                className="break-words rounded-2xl bg-white p-5"
-              >
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <h2 className="font-bold">
-                    {item.firstName} {item.lastName}
-                  </h2>
-                  <p className="text-sm font-bold">
-                    {"★".repeat(item.rating)}
-                    <span className="text-ink/30">
-                      {"★".repeat(5 - item.rating)}
-                    </span>{" "}
-                    {item.rating}/5
-                  </p>
-                </div>
-                {item.sentiment && (
-                  <p className="mt-2 text-sm">
-                    {
-                      FEEDBACK_SENTIMENT_LABELS[
-                        item.sentiment as FeedbackSentiment
-                      ]
-                    }
-                  </p>
-                )}
+          </ul>
+        </section>
+        {!feedback.items.length && (
+          <EmptyState title="No feedback yet">
+            Guest responses will appear here after they complete the feedback
+            form.
+          </EmptyState>
+        )}
+        <div className="grid gap-4 lg:grid-cols-2">
+          {feedback.items.map((item) => (
+            <article
+              key={item.id}
+              className={`${adminPanel} [overflow-wrap:anywhere]`}
+            >
+              <div className="flex flex-wrap justify-between gap-3">
+                <h2 className="font-semibold">
+                  {item.firstName} {item.lastName}
+                </h2>
+                <StatusBadge status="accepted">
+                  {item.rating} / 5 stars
+                </StatusBadge>
+              </div>
+              {item.sentiment && (
+                <p className="mt-2 text-sm text-ink/70">
+                  {FEEDBACK_SENTIMENT_LABELS[item.sentiment]}
+                </p>
+              )}
+              <dl className="mt-5 space-y-4">
                 {item.enjoyedMost && (
-                  <p className="mt-3 text-sm">
-                    <span className="font-bold">Enjoyed: </span>
-                    {item.enjoyedMost}
-                  </p>
+                  <Detail label="Enjoyed most">{item.enjoyedMost}</Detail>
                 )}
                 {item.improvement && (
-                  <p className="mt-2 text-sm">
-                    <span className="font-bold">Improve: </span>
-                    {item.improvement}
-                  </p>
+                  <Detail label="For next time">{item.improvement}</Detail>
                 )}
-                <p className="mt-3 text-xs text-ink/55">
-                  {new Date(item.submittedAt).toLocaleString("en-CA", {
-                    timeZone: event.timezone,
-                  })}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      ) : view === "leads" ? (
-        <div className="space-y-4">
-          {leads.length === 0 && <p>No future-event leads yet.</p>}
-          {leads.map((r) => (
-            <article
-              key={String(r.id)}
-              className="break-words rounded-2xl bg-white p-5"
-            >
-              <h2 className="font-bold">
-                {String(r.first_name)} {String(r.last_name)}
-              </h2>
-              <p>{String(r.email)}</p>
-              <p>{String(r.phone)}</p>
-              <p className="mt-2 text-sm">
-                Marketing consent: {r.marketing_consent ? "Yes" : "No"}
+              </dl>
+              <p className="mt-5 text-xs text-ink/60">
+                {formatDate(item.submittedAt, event.timezone)}
               </p>
-              <p className="text-xs">{String(r.attribution)}</p>
             </article>
           ))}
         </div>
-      ) : (
-        <AdminGuests
-          rows={guests}
-          pendingRows={pendingGuests}
-          checkIn={view === "check-in"}
-          confirmation={
-            view === "guests"
-              ? await fetchAuthQuery(api.jobs.confirmationByEvent, {
-                  eventId: id,
-                })
-              : {}
-          }
-        />
-      )}
-    </Section>
+      </div>
+    );
+  } else if (view === "leads") {
+    const leads = await fetchAuthQuery(api.leads.list, { eventId: id });
+    content = <AdminLeads rows={leads} timezone={event.timezone} />;
+  } else if (view === "check-in") {
+    const guests = (await fetchAuthQuery(api.booking.listGuests, {
+      eventId: id,
+    })) as Attendee[];
+    content = (
+      <AdminCheckIn
+        eventId={id}
+        initialRows={guests.map(adminGuest)}
+        timezone={event.timezone}
+      />
+    );
+  } else {
+    const [guests, pending, confirmation] = await Promise.all([
+      fetchAuthQuery(api.booking.listGuests, { eventId: id }) as Promise<
+        Attendee[]
+      >,
+      fetchAuthQuery(api.booking.listPendingCheckouts, {
+        eventId: id,
+      }) as Promise<Attendee[]>,
+      fetchAuthQuery(api.jobs.confirmationByEvent, { eventId: id }),
+    ]);
+    content = (
+      <AdminGuests
+        rows={guests.map(adminGuest)}
+        pendingRows={pending.map(adminGuest)}
+        confirmation={confirmation}
+        timezone={event.timezone}
+      />
+    );
+  }
+  return (
+    <AdminPage
+      title={titles[view]}
+      description={descriptions[view]}
+      actions={
+        view === "guests" || view === "leads" ? (
+          <a
+            className={adminSecondary}
+            href={`/api/admin/events/${id}/export?kind=${view}`}
+          >
+            Export {view === "leads" ? "leads" : "guests"} CSV
+          </a>
+        ) : undefined
+      }
+    >
+      {content}
+    </AdminPage>
   );
 }

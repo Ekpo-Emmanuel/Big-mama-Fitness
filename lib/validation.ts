@@ -11,13 +11,29 @@ export const attributionSchema = z.object({
   utm_content: z.string().max(100).optional(),
 });
 const contact = {
-  firstName: z.string().trim().min(1, "Enter your first name.").max(80),
-  lastName: z.string().trim().min(1, "Enter your last name.").max(80),
-  email: z.email("Enter a valid email.").trim().toLowerCase().max(254),
+  firstName: z
+    .string()
+    .trim()
+    .min(1, "Enter your first name.")
+    .max(80, "First name must be 80 characters or fewer."),
+  lastName: z
+    .string()
+    .trim()
+    .min(1, "Enter your last name.")
+    .max(80, "Last name must be 80 characters or fewer."),
+  email: z
+    .email("Enter a valid email address.")
+    .trim()
+    .toLowerCase()
+    .max(254, "Email must be 254 characters or fewer."),
   phone: z
     .string()
     .trim()
-    .regex(/^\+?[\d\s().-]{7,25}$/, "Enter a valid phone number."),
+    .min(1, "Enter your phone number.")
+    .regex(
+      /^\+?[\d\s().-]{7,25}$/,
+      "Enter a valid phone number (digits, spaces, and + ( ) - . allowed).",
+    ),
   marketingConsent: z.boolean(),
   attribution: attributionSchema.default({}),
 };
@@ -32,6 +48,18 @@ export const registrationSchema = z.object({
   /** Fingerprint of purchase-relevant fields shown on the form page. */
   purchaseFingerprint: z.string().min(1).max(500).optional(),
 });
+
+/** Client-side fields checked before checkout starts. */
+export const registrationFormSchema = registrationSchema.pick({
+  firstName: true,
+  lastName: true,
+  email: true,
+  phone: true,
+  referralSource: true,
+  waiverAccepted: true,
+  marketingConsent: true,
+});
+
 export const leadSchema = z.object(contact);
 
 export const feedbackSchema = z.object({

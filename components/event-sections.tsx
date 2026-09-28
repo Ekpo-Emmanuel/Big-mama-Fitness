@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { EventMedia } from "./event-media";
 import {
   type DanceEvent,
   eventDate,
@@ -10,6 +9,7 @@ import {
 import { content } from "@/lib/content";
 import { EventCta } from "./event-cta";
 import { Section, Eyebrow, headingClass } from "./ui";
+
 type Props = { event: DanceEvent; sold: number };
 export function CapacityIndicator({ event, sold }: Props) {
   const state = eventState(event, sold);
@@ -30,16 +30,10 @@ export function CapacityIndicator({ event, sold }: Props) {
 export function EventHero({ event, sold }: Props) {
   return (
     <Section className="!pt-7 sm:!pt-10">
-      <div className="mb-10 flex items-center justify-between gap-4 border-b border-ink/20 pb-5">
+      <div className="mb-10 flex items-center justify-between gap-4 pb-5">
         <p className="max-w-48 text-sm font-black uppercase leading-tight">
           {event.shortName}
-          <span className="block font-normal tracking-widest">
-            {event.city}
-          </span>
         </p>
-        <span className="rounded-full border border-ink/30 px-3 py-2 text-xs font-bold">
-          WITH {event.instructorName.toUpperCase()}
-        </span>
       </div>
       <div className="grid items-center gap-10 lg:grid-cols-[1.12fr_1fr] lg:gap-14">
         <div>
@@ -54,12 +48,11 @@ export function EventHero({ event, sold }: Props) {
             {eventDate(event)}
             <br />
             <span className="font-normal">
-              {eventTime(event)}–{eventTime(event, event.endsAt)} · {event.city}
-              , {event.province}
+              {eventTime(event)} – {eventTime(event, event.endsAt)}
             </span>
           </p>
           <div className="mt-7">
-            <EventCta event={event} sold={sold} />
+            <EventCta className="w-full max-w-md" event={event} sold={sold} />
           </div>
           <div className="mt-4">
             <CapacityIndicator event={event} sold={sold} />
@@ -68,47 +61,15 @@ export function EventHero({ event, sold }: Props) {
             {content.reassurance.join(" · ")}
           </p>
         </div>
-        <div className="relative overflow-hidden rounded-[2rem] bg-lilac p-7 sm:p-10">
-          {event.heroVideoUrl && event.heroImageUrl ? (
-            <EventMedia src={event.heroVideoUrl} poster={event.heroImageUrl} />
-          ) : event.heroImageUrl ? (
-            <Image
-              src={event.heroImageUrl}
-              alt="Afro-inspired dance and movement"
-              width={720}
-              height={900}
-              priority
-              className="aspect-[4/5] w-full rounded-2xl object-cover"
-            />
-          ) : (
-            <div className="flex min-h-80 flex-col justify-between sm:min-h-[440px]">
-              <p className="text-xs font-bold tracking-widest uppercase">
-                Your kind of Saturday night
-              </p>
-              <p
-                aria-hidden="true"
-                className="my-8 -rotate-6 font-display text-[clamp(4.5rem,10vw,8rem)] leading-[0.85] uppercase"
-              >
-                Good
-                <br />
-                <span className="text-ink/70">music.</span>
-                <br />
-                Great
-                <br />
-                energy.
-              </p>
-              <div className="flex items-end justify-between">
-                <p className="max-w-40 text-sm">
-                  Bring your water.
-                  <br />
-                  We bring the rhythm.
-                </p>
-                <span className="flex size-20 rotate-12 items-center justify-center rounded-full bg-sun text-xl font-black">
-                  {money(event)}
-                </span>
-              </div>
-            </div>
-          )}
+        <div className="relative overflow-hidden rounded-[2rem] bg-lilac p-4 sm:p-6">
+          <Image
+            src={event.heroImageUrl || "/afro-fit-hero-img.png"}
+            alt="Afro-inspired dance and movement"
+            width={720}
+            height={900}
+            priority
+            className="aspect-[4/5] w-full rounded-2xl object-cover"
+          />
         </div>
       </div>
     </Section>
@@ -163,17 +124,17 @@ export function BeginnerReassurance() {
 }
 export function EventExperience({ event }: { event: DanceEvent }) {
   return (
-    <div className="bg-ink text-cream">
+    <div className="bg-ink text-cream text-center mx-auto">
       <Section>
         <Eyebrow>Turn the music up. Let the day go.</Eyebrow>
-        <h2 className={`${headingClass} max-w-4xl`}>
+        <h2 className={`${headingClass} max-w-4xl mx-auto`}>
           Afrobeats playing.
           <br />
           Everyone moving.
           <br />
           <span className="text-sun">Nobody judging.</span>
         </h2>
-        <p className="mt-7 max-w-xl text-lg leading-relaxed">
+        <p className="mt-7 max-w-xl text-lg leading-relaxed mx-auto">
           {event.description}
         </p>
         {event.heroVideoUrl && (
@@ -252,7 +213,7 @@ export function EventSchedule({ event }: { event: DanceEvent }) {
   );
 }
 export function InstructorSection({ event }: { event: DanceEvent }) {
-  const portrait = event.instructorImageUrl;
+  const portrait = event.instructorImageUrl || "/instructor.png";
   return (
     <Section className="!pt-0">
       <div className="grid items-center gap-8 rounded-3xl bg-lilac p-6 sm:p-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:gap-12 lg:p-12">
@@ -308,8 +269,8 @@ export function TicketOffer({ event, sold }: Props) {
           <br />
         </h2>
         <p className="mt-6 max-w-md leading-relaxed">
-          A small class, with room to feel comfortable. Maximum {event.capacity}{" "}
-          paid tickets.
+          A small class, with room to feel comfortable. {event.capacity} seats
+          available.
         </p>
       </div>
       <div className="rounded-3xl border-2 border-ink p-7 sm:p-10">
@@ -332,7 +293,7 @@ export function TicketOffer({ event, sold }: Props) {
             </li>
           ))}
         </ul>
-        <EventCta event={event} sold={sold} />
+        <EventCta className="w-full" event={event} sold={sold} />
         <div className="mt-4">
           <CapacityIndicator event={event} sold={sold} />
         </div>
@@ -350,7 +311,7 @@ export function EventFaq({ event }: { event: DanceEvent }) {
           ...content.faq,
           [
             "How much is it, and how many spots are available?",
-            `${money(event)} ${event.currency}. Maximum ${event.capacity} paid tickets.`,
+            `${money(event)} ${event.currency}. Maximum ${event.capacity} Seats available.`,
           ],
         ].map(([q, a]) => (
           <details key={q} className="group border-b border-ink/20 py-5">
@@ -368,13 +329,13 @@ export function FinalCta({ event, sold }: Props) {
   return (
     <div className="bg-orange">
       <Section className="text-center">
-        <h2 className={`${headingClass} mx-auto max-w-3xl`}>
+        <h2 className={`${headingClass} mx-auto max-w-xl`}>
           {content.finalHeadline}
         </h2>
-        <p className="my-6">
+        {/* <p className="my-6">
           {eventDate(event)} · {event.city} · {money(event)} {event.currency}
-        </p>
-        <EventCta event={event} sold={sold} />
+        </p> */}
+        <EventCta className="mt-6" event={event} sold={sold} />
       </Section>
     </div>
   );

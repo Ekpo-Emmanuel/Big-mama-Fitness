@@ -3,6 +3,7 @@ import Link from "next/link";
 import { trackEvent } from "@/lib/analytics";
 import { type DanceEvent, eventState, money } from "@/lib/event";
 import { buttonClass } from "./ui";
+import { ArrowRight } from "lucide-react";
 export function EventCta({
   event,
   sold,
@@ -32,8 +33,8 @@ export function EventCta({
           : `/event/${event.slug}#next-class`
       }
     >
-      {open ? `Reserve My Spot — ${money(event)}` : "Join the Next Class List"}
-      <span aria-hidden="true">↗</span>
+      {open ? `Reserve My Spot` : "Join the Next Class List"}
+      <ArrowRight className="h-4 w-4" aria-hidden="true" />
     </Link>
   );
 }

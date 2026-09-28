@@ -15,21 +15,30 @@ export function LoginForm() {
     setBusy(true);
     setError(false);
     const data = new FormData(event.currentTarget);
-    const result = await authClient.signIn.email({
-      email: String(data.get("email") || ""),
-      password: String(data.get("password") || ""),
-    });
-    if (result.error) {
+    try {
+      const result = await authClient.signIn.email({
+        email: String(data.get("email") || ""),
+        password: String(data.get("password") || ""),
+      });
+      if (result.error) {
+        setError(true);
+        setBusy(false);
+        return;
+      }
+      router.replace("/admin");
+      router.refresh();
+    } catch {
       setError(true);
       setBusy(false);
-      return;
     }
-    router.replace("/admin");
-    router.refresh();
   }
   return (
     <Section className="max-w-md">
+      <p className="mb-6 font-display text-2xl uppercase">Big Mama Fitness</p>
       <h1 className="text-3xl font-bold">Organizer sign in</h1>
+      <p className="mt-3 text-sm text-ink/70">
+        Your guests, your events, your community.
+      </p>
       <form onSubmit={submit} className="mt-8 space-y-5">
         <label className="block font-bold">
           Email
@@ -49,7 +58,7 @@ export function LoginForm() {
           </p>
         )}
         <button disabled={busy} className={`${buttonClass} w-full`}>
-          Sign in
+          {busy ? "Signing in…" : "Sign in"}
         </button>
       </form>
     </Section>

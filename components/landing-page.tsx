@@ -1,3 +1,5 @@
+import Image from "next/image";
+import Link from "next/link";
 import { type DanceEvent, eventState } from "@/lib/event";
 import * as Sections from "./event-sections";
 import { Notice, Section } from "./ui";
@@ -49,13 +51,20 @@ export function LandingPage({
           <FutureEventLeadForm eventId={event.id} />
         </Section>
       )}
-      <footer className="mx-auto flex max-w-7xl flex-wrap justify-between gap-4 px-5 py-8 text-xs sm:px-8 lg:px-12">
-        <p>
-          {event.name} · With {event.instructorName}
-        </p>
-        <p>
-          {event.city}, {event.province} · Everyone welcome.
-        </p>
+      <footer className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-8 text-xs sm:px-8 lg:px-12">
+        <div className="flex items-center gap-3">
+          <Image
+            src="/logo.svg"
+            alt="Big Mama Fitness"
+            width={36}
+            height={36}
+            className="rounded-lg"
+          />
+          <p>Big Mama Fitness</p>
+        </div>
+        <Link href="/privacy" className="underline underline-offset-2">
+          Privacy policy
+        </Link>
       </footer>
       <Sections.StickyMobileCta event={event} sold={sold} />
     </main>

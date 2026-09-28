@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import React, { type ReactNode } from "react";
 import { type DanceEvent, eventTime } from "@/lib/event";
@@ -153,15 +154,20 @@ export function RegistrationConfirmation({
   return (
     <>
       <div className="mx-auto max-w-7xl px-5 pb-10 pt-6 sm:px-8 sm:pt-8 lg:px-12">
-        <header className="flex items-center justify-between gap-4 border-b border-ink/15 pb-5">
+        <header className="flex items-center justify-between gap-4 pb-5">
           <Link
             href={`/event/${event.slug}`}
-            className="max-w-56 font-display text-lg leading-tight uppercase focus-visible:outline-2 focus-visible:outline-offset-4"
+            aria-label="Big Mama Fitness"
+            className="inline-flex focus-visible:outline-2 focus-visible:outline-offset-4"
           >
-            {event.shortName}
-            <span className="mt-1 block font-sans text-[10px] tracking-[0.2em]">
-              {event.city}
-            </span>
+            <Image
+              src="/logo.svg"
+              alt="Big Mama Fitness"
+              width={44}
+              height={44}
+              className="rounded-lg"
+              priority
+            />
           </Link>
         </header>
         <div className="grid gap-9 py-10 sm:py-14 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-16">

@@ -2,29 +2,54 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { fetchAuthQuery } from "@/lib/auth-server";
 import { api } from "@/lib/convex";
-import type { DanceEvent } from "@/lib/event";
-import { Section } from "@/components/ui";
+import { eventDateFull, eventTime, type DanceEvent } from "@/lib/event";
+import {
+  AdminPage,
+  EmptyState,
+  StatusBadge,
+  adminPanel,
+} from "@/components/admin-ui";
+import { ArrowUpRight } from "lucide-react";
 export default async function Admin() {
   await requireAdmin();
   const events: DanceEvent[] = await fetchAuthQuery(api.events.listAll, {});
   return (
-    <Section>
-      <h1 className="text-3xl font-bold">Your events</h1>
-      <div className="mt-8 grid gap-5">
+    <AdminPage
+      title="Your events"
+      description="Everything you need to welcome your guests. Choose an event to get started."
+    >
+      <div className="grid gap-4 sm:grid-cols-2">
         {events.length === 0 ? (
-          <p>No events in the database yet.</p>
+          <EmptyState title="No events yet">
+            Your events will appear here when they are set up.
+          </EmptyState>
         ) : (
-          events.map((e) => (
+          events.map((event) => (
             <Link
-              key={e.id}
-              href={`/admin/events/${e.id}`}
-              className="rounded-2xl border border-ink/20 bg-white p-6 underline"
+              key={event.id}
+              href={`/admin/events/${event.id}`}
+              className={`${adminPanel} group transition hover:border-ink/30 focus-visible:outline-2 focus-visible:outline-offset-4`}
             >
-              {e.name}
+              <div className="flex items-center justify-between gap-3">
+                <StatusBadge status={event.status} />
+                <ArrowUpRight size={20} aria-hidden="true" />
+              </div>
+              <h2 className="mt-5 text-xl font-semibold tracking-tight [overflow-wrap:anywhere]">
+                {event.name}
+              </h2>
+              <p className="mt-2 text-sm text-ink/70">
+                {eventDateFull(event)} · {eventTime(event)}
+              </p>
+              <p className="mt-1 text-sm text-ink/70">
+                {event.venueName || event.addressLine1}, {event.city}
+              </p>
+              <p className="mt-6 border-t border-ink/10 pt-4 text-sm font-semibold">
+                Manage event
+              </p>
             </Link>
           ))
         )}
       </div>
-    </Section>
+    </AdminPage>
   );
 }

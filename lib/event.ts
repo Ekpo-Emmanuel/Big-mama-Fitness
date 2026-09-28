@@ -65,13 +65,13 @@ export const initialEvent: DanceEvent = {
   registrationOpen: true,
   instructorName: "Brenda",
   instructorBio:
-    "Join Brenda for a welcoming class built around Afro music, movement, and finding your own pace.",
+    "Join me for a welcoming class built around Afro music, movement, and finding your own pace.",
   contactEmail: "",
-  heroImageUrl: "",
+  heroImageUrl: "/afro-fit-hero-img.png",
   heroVideoUrl: "",
-  instructorImageUrl: "",
+  instructorImageUrl: "/instructor.png",
   waiverVersion: "bmf-afro-dance-2026-10-v1",
-  waiverText: `Participation Waiver and Assumption of Risk
+  waiverText: `Participation Waiver
 
 I understand that participating in Afro Dance Fitness involves physical activity and may include risks such as muscle strains, sprains, falls, dizziness, fatigue, or other injury.
 

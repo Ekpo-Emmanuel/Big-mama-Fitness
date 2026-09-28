@@ -16,6 +16,9 @@ export async function POST(
       action === "resend_confirmation"
         ? await fetchAuthMutation(api.jobs.retryConfirmation, { attendeeId })
         : await fetchAuthMutation(api.guests.update, { attendeeId, action });
+    if (request.headers.get("accept")?.includes("application/json")) {
+      return Response.json({ ok: true });
+    }
     return Response.redirect(
       `${siteUrl()}/admin/events/${id}/${form.get("view") === "check-in" ? "check-in" : "guests"}`,
       303,

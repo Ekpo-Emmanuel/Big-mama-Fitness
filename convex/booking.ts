@@ -639,3 +639,97 @@ export const dedupePendingCheckouts = mutation({
   },
 });
 
+/**
+ * Explicit cleanup: delete named unpaid released/cancelled attendees.
+ * Never deletes paid/sold/held rows. Recalculates heldCount from live holds.
+ */
+export const deleteReleasedAttendeesById = mutation({
+  args: {
+    eventId: v.string(),
+    attendeeIds: v.array(v.string()),
+    keepAttendeeId: v.string(),
+    internalSecret: v.string(),
+    dryRun: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    assertInternal(args.internalSecret);
+    const eventRow = await findEvent(ctx, args.eventId);
+    if (!eventRow) fail("Event not found.", 404);
+
+    const all = await ctx.db
+      .query("attendees")
+      .withIndex("by_event", (q) => q.eq("eventId", eventRow.eventId))
+      .collect();
+
+    const byId = new Map(all.map((row) => [row.attendeeId, row]));
+    const keep = byId.get(args.keepAttendeeId);
+    if (!keep) fail("Keep attendee not found.", 404);
+    if (keep.paymentStatus === "paid" || keep.inventoryStatus === "sold") {
+      fail("Keep attendee is paid/sold; abort.", 409);
+    }
+
+    const deleteSet = new Set(args.attendeeIds);
+    if (deleteSet.has(args.keepAttendeeId)) {
+      fail("keepAttendeeId must not be in attendeeIds.", 400);
+    }
+
+    const toDelete = [];
+    for (const id of args.attendeeIds) {
+      const row = byId.get(id);
+      if (!row) fail(`Attendee not found: ${id}`, 404);
+      if (row.eventId !== eventRow.eventId) {
+        fail(`Attendee ${id} belongs to another event.`, 400);
+      }
+      if (row.paymentStatus === "paid" || row.inventoryStatus === "sold") {
+        fail(`Refusing paid/sold attendee: ${id}`, 409);
+      }
+      if (row.inventoryStatus === "held") {
+        fail(`Refusing held attendee: ${id}`, 409);
+      }
+      if (
+        row.paymentStatus !== "cancelled" &&
+        row.paymentStatus !== "failed"
+      ) {
+        fail(
+          `Refusing attendee ${id}: paymentStatus=${row.paymentStatus}`,
+          409,
+        );
+      }
+      if (row.inventoryStatus !== "released") {
+        fail(
+          `Refusing attendee ${id}: inventoryStatus=${row.inventoryStatus}`,
+          409,
+        );
+      }
+      toDelete.push(row);
+    }
+
+    if (!args.dryRun) {
+      for (const row of toDelete) {
+        await cancelHoldJob(ctx, row.attendeeId);
+        await deleteCheckoutRecord(ctx, row.attendeeId);
+        await ctx.db.delete(row._id);
+      }
+
+      const remaining = await ctx.db
+        .query("attendees")
+        .withIndex("by_event", (q) => q.eq("eventId", eventRow.eventId))
+        .collect();
+      const heldCount = remaining.filter(
+        (row) => row.inventoryStatus === "held",
+      ).length;
+      const soldCount = remaining.filter(
+        (row) => row.inventoryStatus === "sold",
+      ).length;
+      await ctx.db.patch(eventRow._id, { heldCount, soldCount });
+    }
+
+    return {
+      dryRun: Boolean(args.dryRun),
+      kept: args.keepAttendeeId,
+      deleted: toDelete.map((row) => row.attendeeId),
+      eventId: eventRow.eventId,
+    };
+  },
+});
+

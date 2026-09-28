@@ -18,11 +18,13 @@ export async function updateGuestHandler(
     fail("Only paid tickets can be managed here.", 409);
   const now = new Date().toISOString();
   const actor = actorId ?? null;
-  if (
-    action === "check_in" &&
-    row.paymentStatus === "paid" &&
-    ["confirmed", "no_show"].includes(row.attendeeStatus)
-  )
+  if (action === "check_in") {
+    if (row.paymentStatus !== "paid")
+      fail("Only paid tickets can be managed here.", 409);
+    // Already checked in: safe no-op for concurrent organizers.
+    if (row.attendeeStatus === "checked_in") return row.eventId;
+    if (!["confirmed", "no_show"].includes(row.attendeeStatus))
+      fail("This status change is not available.", 409);
     await ctx.db.patch(row._id, {
       attendeeStatus: "checked_in",
       checkedInAt: now,
@@ -30,7 +32,19 @@ export async function updateGuestHandler(
       updatedBy: actor,
       updatedAt: now,
     });
-  else if (action === "cancel" && row.paymentStatus === "paid")
+  } else if (action === "undo_check_in") {
+    if (row.paymentStatus !== "paid")
+      fail("Only paid tickets can be managed here.", 409);
+    // Already not checked in: safe no-op.
+    if (row.attendeeStatus !== "checked_in") return row.eventId;
+    await ctx.db.patch(row._id, {
+      attendeeStatus: "confirmed",
+      checkedInAt: null,
+      checkedInBy: null,
+      updatedBy: actor,
+      updatedAt: now,
+    });
+  } else if (action === "cancel" && row.paymentStatus === "paid")
     await ctx.db.patch(row._id, {
       attendeeStatus: "cancelled",
       cancelledAt: now,

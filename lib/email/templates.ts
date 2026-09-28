@@ -65,7 +65,7 @@ function wrap(title: string, inner: string) {
           </tr>
           <tr>
             <td style="padding:8px 24px 28px;font-family:${SANS};font-size:12px;color:${INK};">
-              ${BRAND} · With Brenda · Nanaimo, BC · Everyone welcome.
+              ${BRAND}
             </td>
           </tr>
         </table>

@@ -5,6 +5,7 @@ import { eventState, eventDate, money } from "@/lib/event";
 import { RegistrationForm } from "@/components/registration-form";
 import { Section, Notice, headingClass } from "@/components/ui";
 export const dynamic = "force-dynamic";
+import { ArrowLeft } from "lucide-react";
 export const metadata = {
   title: "Reserve your spot",
   robots: { index: false, follow: false },
@@ -19,12 +20,12 @@ export default async function RegisterPage({
   const open = eventState(event, (await inventory(event.id)).sold) === "open";
   return (
     <main id="main">
-      <Section className="max-w-2xl">
+      <Section className="!max-w-3xl">
         <Link
           href={`/event/${event.slug}`}
-          className="inline-block min-h-11 text-sm underline"
+          className="inline-flex items-center gap-2 text-sm hover:underline"
         >
-          ← Back to the class
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
         </Link>
         <h1 className={`${headingClass} mt-6`}>
           Your spot.
@@ -34,7 +35,7 @@ export default async function RegisterPage({
         <p className="my-6 leading-relaxed">
           {event.name}
           <br />
-          {eventDate(event)} · {money(event)} {event.currency}
+          {eventDate(event)}
         </p>
         {open ? (
           <RegistrationForm

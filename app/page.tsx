@@ -1,16 +1,23 @@
-import { redirect } from "next/navigation";
+import { getEvent, inventory } from "@/lib/db";
+import { LandingPage } from "@/components/landing-page";
 import { initialEvent } from "@/lib/event";
-import { cleanAttribution, utmKeys } from "@/lib/attribution";
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const attribution = cleanAttribution(await searchParams);
-  const query = new URLSearchParams();
-  for (const key of utmKeys)
-    if (attribution[key]) query.set(key, attribution[key]);
-  redirect(
-    "/event/" + initialEvent.slug + (query.size ? "?" + query.toString() : ""),
+import { eventSchema, safeJson } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  // Serve landing at `/` so WhatsApp/OG scrapers of www.bigmamafit.ca
+  // get the root opengraph-image (not a redirect to the event route).
+  const event = (await getEvent(initialEvent.slug)) ?? initialEvent;
+  const sold = (await inventory(event.id)).sold;
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJson(eventSchema(event, sold)) }}
+      />
+      <LandingPage event={event} sold={sold} />
+    </>
   );
 }

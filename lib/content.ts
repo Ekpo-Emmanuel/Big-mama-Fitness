@@ -29,20 +29,16 @@ export const content = {
     ],
     ["Is this only for women?", "No. The class is open to everyone."],
     [
-      "Can I come alone?",
-      "Absolutely. Come on your own or bring a friend. Everyone is welcome.",
-    ],
-    [
       "What should I wear and bring?",
       "Wear comfortable workout clothing and athletic shoes. Bring a water bottle and anything you normally need for a workout.",
     ],
     [
       "Can I pay at the door?",
-      "Only if spots remain. Online registration and successful payment are the only way to guarantee a spot.",
+      "No. Payment is online only. Register and pay here to lock in your spot.",
     ],
     [
       "What happens if the class sells out?",
-      "Join the next-class list to hear about future events. This list does not replace cancelled tickets.",
+      "Join the next-class waitlist to hear about future events.",
     ],
   ],
   finalHeadline: "Come for the workout. Stay for the energy.",
