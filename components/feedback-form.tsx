@@ -73,7 +73,7 @@ export function FeedbackForm({
 
   if (done) {
     return (
-      <div className="space-y-6 text-center">
+      <div role="status" className="motion-enter space-y-6 text-center">
         <h1 className="font-display text-4xl uppercase leading-[1.05] tracking-tight sm:text-5xl">
           Thanks for the feedback 💛
         </h1>
@@ -101,7 +101,7 @@ export function FeedbackForm({
         </p>
       </div>
 
-      <fieldset>
+      <fieldset className="min-w-0">
         <legend className="text-sm font-bold">
           How would you rate the class?
         </legend>
@@ -123,7 +123,7 @@ export function FeedbackForm({
                 aria-label={label}
                 title={label}
                 onClick={() => setRating(value)}
-                className={`flex h-14 w-14 items-center justify-center rounded-2xl text-3xl transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
+                className={`motion-press flex h-14 w-14 items-center justify-center rounded-2xl text-3xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
                   filled
                     ? "scale-105 bg-orange text-cream"
                     : "bg-white text-ink/30 hover:bg-lilac/60 hover:text-ink/70"
@@ -156,7 +156,7 @@ export function FeedbackForm({
                 onClick={() =>
                   setSentiment((current) => (current === value ? "" : value))
                 }
-                className={`min-h-12 rounded-2xl px-3 py-3 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
+                className={`motion-press min-h-12 rounded-2xl px-3 py-3 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
                   active
                     ? "bg-ink text-cream"
                     : "bg-white text-ink hover:bg-lilac/50"
@@ -201,7 +201,12 @@ export function FeedbackForm({
 
       {error && <Notice>{error}</Notice>}
 
-      <button type="submit" disabled={busy} className={`${buttonClass} w-full`}>
+      <button
+        type="submit"
+        disabled={busy}
+        aria-busy={busy}
+        className={`${buttonClass} w-full`}
+      >
         {busy
           ? "Sending…"
           : alreadySubmitted

@@ -29,7 +29,7 @@ export function AdminNavigation({ eventId }: { eventId: string }) {
         key={item.path}
         href={root + item.path}
         aria-current={active ? "page" : undefined}
-        className={`${mobile ? "flex-col gap-1 px-1 py-2 text-[11px]" : "gap-2 px-4 py-3 text-sm"} flex min-h-12 min-w-0 items-center justify-center rounded-xl font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 ${active ? "bg-ink text-white" : "text-ink/70 hover:bg-lilac/40"}`}
+        className={`${mobile ? "flex-col gap-1 px-1 py-2 text-[11px]" : "gap-2 px-4 py-3 text-sm"} motion-press flex min-h-12 min-w-0 items-center justify-center rounded-xl font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 ${active ? "bg-ink text-white" : "text-ink/70 hover:bg-lilac/40"}`}
       >
         <Icon size={18} aria-hidden="true" />
         <span>{item.label}</span>
@@ -52,7 +52,10 @@ export function AdminNavigation({ eventId }: { eventId: string }) {
       >
         <div className="mx-auto grid max-w-lg grid-cols-4 gap-1">
           {items.slice(0, 3).map((item) => link(item, true))}
-          <details key={pathname} className="group">
+          <details
+            key={pathname}
+            className="motion-disclosure motion-menu group"
+          >
             <summary
               className={`flex min-h-14 cursor-pointer list-none flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-semibold focus-visible:outline-2 ${items.slice(3).some((item) => pathname === root + item.path) ? "bg-ink text-white" : "text-ink/70"}`}
             >

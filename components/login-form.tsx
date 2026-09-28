@@ -53,11 +53,15 @@ export function LoginForm() {
         </label>
         <PasswordField />
         {error && (
-          <p role="alert" className="text-red-800">
+          <p role="alert" className="motion-enter text-red-800">
             Sign-in failed. Check your email and password and try again.
           </p>
         )}
-        <button disabled={busy} className={`${buttonClass} w-full`}>
+        <button
+          disabled={busy}
+          aria-busy={busy}
+          className={`${buttonClass} w-full`}
+        >
           {busy ? "Signing in…" : "Sign in"}
         </button>
       </form>

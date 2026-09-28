@@ -1,9 +1,10 @@
 "use client";
 import Link from "next/link";
 import { trackEvent } from "@/lib/analytics";
-import { type DanceEvent, eventState, money } from "@/lib/event";
+import { type DanceEvent, eventState } from "@/lib/event";
 import { buttonClass } from "./ui";
 import { ArrowRight } from "lucide-react";
+import { MotionValue } from "./motion";
 export function EventCta({
   event,
   sold,
@@ -33,7 +34,9 @@ export function EventCta({
           : `/event/${event.slug}#next-class`
       }
     >
-      {open ? `Reserve My Spot` : "Join the Next Class List"}
+      <MotionValue value={String(open)}>
+        {open ? `Reserve My Spot` : "Join the Next Class List"}
+      </MotionValue>
       <ArrowRight className="h-4 w-4" aria-hidden="true" />
     </Link>
   );

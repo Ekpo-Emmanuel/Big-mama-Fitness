@@ -32,13 +32,16 @@ export function WaiverAcceptance({
   useLayoutEffect(() => {
     const dialog = dialogRef.current;
     if (!open || !dialog || dialog.open) return;
+    const previousOverflow = document.body.style.overflow;
     dialog.showModal();
     document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
   }, [open]);
 
   function handleNativeClose() {
     setOpen(false);
-    document.body.style.overflow = "";
     requestAnimationFrame(() => triggerRef.current?.focus());
   }
 
@@ -84,63 +87,65 @@ export function WaiverAcceptance({
           </p>
         </div>
         {error ? (
-          <p id={errorId} role="alert" className="mt-2 text-sm font-normal text-red-800">
+          <p
+            id={errorId}
+            role="alert"
+            className="mt-2 text-sm font-normal text-red-800"
+          >
             {error}
           </p>
         ) : null}
       </div>
-      {open ? (
-        <dialog
-          ref={dialogRef}
-          aria-labelledby={titleId}
-          className="fixed inset-0 z-50 m-0 flex h-full max-h-none w-full max-w-none items-end justify-center border-0 bg-transparent p-0 backdrop:bg-ink/50 sm:items-center"
-          onClose={handleNativeClose}
-          onClick={(event) => {
-            if (event.target === event.currentTarget) requestClose();
-          }}
+      <dialog
+        ref={dialogRef}
+        aria-labelledby={titleId}
+        className="motion-dialog motion-sheet fixed inset-0 z-50 m-0 flex h-full max-h-none w-full max-w-none items-end justify-center border-0 bg-transparent p-0 backdrop:bg-ink/50 not-open:hidden sm:items-center"
+        onClose={handleNativeClose}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) requestClose();
+        }}
+      >
+        <div
+          className="motion-sheet-panel flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-cream text-ink shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-3xl"
+          onClick={(event) => event.stopPropagation()}
         >
-          <div
-            className="flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-cream text-ink shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-3xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-ink/15 px-5 py-4 sm:px-6">
-              <div>
-                <p className="mb-2 text-[10px] font-bold tracking-[0.18em] uppercase">
-                  Required
-                </p>
-                <h2
-                  id={titleId}
-                  className="font-display text-3xl leading-[1.05] uppercase"
-                >
-                  {WAIVER_TITLE}
-                </h2>
-              </div>
-              <button
-                type="button"
-                aria-label="Close"
-                className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-2xl leading-none hover:bg-ink/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-                onClick={requestClose}
-              >
-                ×
-              </button>
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
-              <p className="whitespace-pre-wrap text-base leading-relaxed">
-                {text}
+          <div className="flex items-start justify-between gap-4 border-b border-ink/15 px-5 py-4 sm:px-6">
+            <div>
+              <p className="mb-2 text-[10px] font-bold tracking-[0.18em] uppercase">
+                Required
               </p>
-            </div>
-            <div className="border-t border-ink/15 bg-cream px-5 py-4 sm:px-6">
-              <button
-                type="button"
-                className={`${buttonClass} w-full`}
-                onClick={acceptAndContinue}
+              <h2
+                id={titleId}
+                className="font-display text-3xl leading-[1.05] uppercase"
               >
-                Accept & Continue
-              </button>
+                {WAIVER_TITLE}
+              </h2>
             </div>
+            <button
+              type="button"
+              aria-label="Close"
+              className="motion-press inline-flex size-11 shrink-0 items-center justify-center rounded-full text-2xl leading-none hover:bg-ink/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+              onClick={requestClose}
+            >
+              ×
+            </button>
           </div>
-        </dialog>
-      ) : null}
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
+            <p className="whitespace-pre-wrap text-base leading-relaxed">
+              {text}
+            </p>
+          </div>
+          <div className="border-t border-ink/15 bg-cream px-5 py-4 sm:px-6">
+            <button
+              type="button"
+              className={`${buttonClass} w-full`}
+              onClick={acceptAndContinue}
+            >
+              Accept & Continue
+            </button>
+          </div>
+        </div>
+      </dialog>
     </>
   );
 }

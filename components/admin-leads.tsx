@@ -83,7 +83,7 @@ export function AdminLeads({
             >
               {row.phone}
             </a>
-            <details className="mt-3 border-t border-ink/10">
+            <details className="motion-disclosure mt-3 border-t border-ink/10">
               <summary className="cursor-pointer py-3 text-xs font-semibold">
                 Interest & consent details
               </summary>

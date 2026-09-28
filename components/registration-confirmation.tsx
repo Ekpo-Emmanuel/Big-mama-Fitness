@@ -171,7 +171,11 @@ export function RegistrationConfirmation({
           </Link>
         </header>
         <div className="grid gap-9 py-10 sm:py-14 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-16">
-          <section aria-labelledby="confirmation-heading">
+          <section
+            key={state}
+            className="motion-enter"
+            aria-labelledby="confirmation-heading"
+          >
             <p className="mb-6 inline-flex items-center gap-2 rounded-full bg-sun px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase">
               {paid && <Icon kind="check" className="h-4 w-4" />}
               {paid ? "Spot confirmed" : message!.badge}

@@ -113,7 +113,11 @@ function issuesToFieldErrors(
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
   return (
-    <p id={id} role="alert" className="mt-1.5 text-sm font-normal text-red-800">
+    <p
+      id={id}
+      role="alert"
+      className="motion-enter mt-1.5 text-sm font-normal text-red-800"
+    >
       {message}
     </p>
   );
@@ -331,7 +335,7 @@ export function RegistrationForm({
       {errorCount > 0 && (
         <p
           role="alert"
-          className="rounded-xl border border-red-700 bg-red-50 p-4 text-sm text-red-900"
+          className="motion-enter rounded-xl border border-red-700 bg-red-50 p-4 text-sm text-red-900"
         >
           {errorCount === 1
             ? "Fix the highlighted field below to continue."
@@ -430,7 +434,7 @@ export function RegistrationForm({
         <p
           id={formErrorId}
           role="alert"
-          className="rounded-xl border border-red-700 bg-red-50 p-4 text-red-900"
+          className="motion-enter rounded-xl border border-red-700 bg-red-50 p-4 text-red-900"
         >
           {formError}
         </p>
@@ -442,7 +446,10 @@ export function RegistrationForm({
       >
         {busy ? (
           <>
-            <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
+            <LoaderCircle
+              className="motion-loading h-4 w-4"
+              aria-hidden="true"
+            />
             Opening secure checkout…
           </>
         ) : (

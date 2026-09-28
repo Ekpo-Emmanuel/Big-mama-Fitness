@@ -20,6 +20,7 @@ import { siteShareMetadata } from "@/lib/seo";
 import { initialEvent } from "@/lib/event";
 import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { AnalyticsProvider } from "@/components/analytics-provider";
+import { MotionPreferences } from "@/components/motion";
 import { isValidGtmId } from "@/lib/analytics";
 import { getToken } from "@/lib/auth-server";
 
@@ -53,7 +54,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full bg-cream font-sans text-ink selection:bg-sun">
         {isValidGtmId(gtmId) ? (
           <>
-            <Script id="gtm" strategy="beforeInteractive">{`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}</Script>
+            <Script
+              id="gtm"
+              strategy="beforeInteractive"
+            >{`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}</Script>
             <noscript>
               <iframe
                 src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
@@ -75,6 +79,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </ConvexClientProvider>
         <AnalyticsProvider />
+        <MotionPreferences />
       </body>
     </html>
   );

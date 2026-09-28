@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 export const buttonClass =
-  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 text-center text-sm font-bold text-white transition hover:bg-ink/85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-50";
+  "motion-press inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 text-center text-sm font-bold text-white hover:bg-ink/85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-50";
 export const inputClass =
-  "mt-2 min-h-12 w-full rounded-xl border border-ink/25 bg-white px-4 py-3 text-base outline-none focus:border-ink focus:ring-2 focus:ring-lilac";
+  "motion-state mt-2 min-h-12 w-full rounded-xl border border-ink/25 bg-white px-4 py-3 text-base outline-none focus:border-ink focus:ring-2 focus:ring-lilac";
 export const inputErrorClass =
   "border-red-700 focus:border-red-700 focus:ring-red-200";
 export const headingClass =
@@ -36,7 +36,7 @@ export function Notice({ children }: { children: ReactNode }) {
   return (
     <p
       role="status"
-      className="rounded-xl border border-ink/20 bg-sun/30 p-4 text-sm leading-relaxed"
+      className="motion-enter rounded-xl border border-ink/20 bg-sun/30 p-4 text-sm leading-relaxed"
     >
       {children}
     </p>

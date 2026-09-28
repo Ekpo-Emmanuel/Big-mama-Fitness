@@ -81,11 +81,11 @@ export function FutureEventLeadForm({ eventId }: { eventId: string }) {
         this class.
       </p>
       {error && (
-        <p role="alert" className="text-red-800">
+        <p role="alert" className="motion-enter text-red-800">
           {error}
         </p>
       )}
-      <button disabled={busy} className={buttonClass}>
+      <button disabled={busy} aria-busy={busy} className={buttonClass}>
         {busy ? "Saving…" : "Notify Me About the Next Class"}
       </button>
     </form>

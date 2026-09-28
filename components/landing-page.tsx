@@ -43,7 +43,7 @@ export function LandingPage({
       <AvailabilityRefresh />
       <EventTracking eventId={event.id} soldOut={state === "sold_out"} />
       {state !== "open" && (
-        <Section id="next-class">
+        <Section id="next-class" className="motion-enter">
           <h2 className="text-3xl font-bold">Be part of the next class.</h2>
           <p className="mt-4">
             Missed this one? Leave your details to hear about future classes.

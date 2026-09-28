@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Search, X } from "lucide-react";
+import { MotionValue, useChangeMotion } from "./motion";
 import type { Attendee } from "@/lib/booking";
 import {
   adminButton,
@@ -50,7 +51,8 @@ function actionLabel(action: string, firstName: string, lastName: string) {
 }
 
 function actionError(action: string, firstName: string) {
-  if (action === "check_in") return `Couldn't check ${firstName} in. Try again.`;
+  if (action === "check_in")
+    return `Couldn't check ${firstName} in. Try again.`;
   if (action === "undo_check_in")
     return `Couldn't undo ${firstName}'s check-in. Try again.`;
   return "Unable to save. Check your connection and try again.";
@@ -124,7 +126,7 @@ export function AdminGuests({
         <div className="flex items-end justify-between gap-3 rounded-2xl bg-lilac/40 p-4">
           <div>
             <span className="text-2xl font-bold tabular-nums">
-              {checked}{" "}
+              <MotionValue value={checked}>{checked}</MotionValue>{" "}
               <span className="text-base font-normal text-ink/60">
                 / {paid.length}
               </span>
@@ -166,7 +168,7 @@ export function AdminGuests({
                   setGroup(value);
                   setFilter("all");
                 }}
-                className={`min-h-12 rounded-lg px-2 py-2 text-xs font-semibold sm:text-sm ${group === value ? "bg-white shadow-sm" : "hover:bg-white/60"}`}
+                className={`motion-press min-h-12 rounded-lg px-2 py-2 text-xs font-semibold sm:text-sm ${group === value ? "bg-white shadow-sm" : "hover:bg-white/60"}`}
               >
                 {label}
               </button>
@@ -219,7 +221,7 @@ export function AdminGuests({
                 key={value}
                 aria-pressed={filter === value}
                 onClick={() => setFilter(value)}
-                className={`min-h-11 rounded-lg px-3 text-xs font-semibold ${filter === value ? "bg-ink text-white" : "bg-white ring-1 ring-inset ring-ink/15"}`}
+                className={`motion-press min-h-11 rounded-lg px-3 text-xs font-semibold ${filter === value ? "bg-ink text-white" : "bg-white ring-1 ring-inset ring-ink/15"}`}
               >
                 {label}
               </button>
@@ -233,7 +235,7 @@ export function AdminGuests({
           message ? "text-sm font-semibold text-emerald-900" : "sr-only"
         }
       >
-        {message}
+        <MotionValue value={message}>{message}</MotionValue>
       </p>
       {!checkIn && group === "pending" && (
         <p className="rounded-xl bg-sun/25 p-4 text-sm leading-relaxed">
@@ -301,6 +303,8 @@ function GuestCard({
   const [error, setError] = useState("");
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
+  const card = useRef<HTMLElement>(null);
+  useChangeMotion(card, row.attendee_status);
   const locked = useRef(false);
   const [refreshing, startRefresh] = useTransition();
   const pending = row.payment_status === "pending";
@@ -338,7 +342,6 @@ function GuestCard({
         startRefresh(() => router.refresh());
       }
       dialog.current?.close();
-      setConfirmAction(null);
       onSuccess(actionLabel(action, row.first_name, row.last_name));
     } catch {
       setError(actionError(action, row.first_name));
@@ -350,7 +353,8 @@ function GuestCard({
 
   return (
     <article
-      className={`min-w-0 rounded-2xl border p-4 sm:p-5 ${checkedIn ? "border-emerald-800/20 bg-emerald-50/40" : "border-ink/10 bg-white"}`}
+      ref={card}
+      className={`motion-state min-w-0 rounded-2xl border p-4 sm:p-5 ${checkedIn ? "border-emerald-800/20 bg-emerald-50/40" : "border-ink/10 bg-white"}`}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1 basis-40">
@@ -388,7 +392,7 @@ function GuestCard({
             </p>
             <button
               type="button"
-              className="min-h-9 px-1 text-xs font-medium text-ink/50 underline-offset-2 hover:text-ink hover:underline disabled:opacity-50"
+              className="motion-press min-h-9 px-1 text-xs font-medium text-ink/50 underline-offset-2 hover:text-ink hover:underline disabled:opacity-50"
               disabled={busy}
               onClick={() => update("undo_check_in")}
             >
@@ -402,7 +406,7 @@ function GuestCard({
           {error}
         </p>
       )}
-      <details className="mt-3 border-t border-ink/10 pt-1">
+      <details className="motion-disclosure mt-3 border-t border-ink/10 pt-1">
         <summary className="min-h-11 cursor-pointer py-3 text-xs font-semibold focus-visible:outline-2">
           Guest details
         </summary>
@@ -442,7 +446,7 @@ function GuestCard({
               </Detail>
             )}
           </dl>
-          <details className="rounded-xl bg-cream p-3">
+          <details className="motion-disclosure rounded-xl bg-cream p-3">
             <summary className="cursor-pointer py-2 text-sm font-semibold">
               Waiver {row.waiver_accepted_at ? "accepted" : "not recorded"}
             </summary>
@@ -454,7 +458,7 @@ function GuestCard({
               {row.waiver_text || "No waiver snapshot recorded."}
             </p>
           </details>
-          <details>
+          <details className="motion-disclosure">
             <summary className="cursor-pointer py-3 text-xs font-semibold">
               Consent & referral
             </summary>
@@ -519,8 +523,7 @@ function GuestCard({
       <dialog
         ref={dialog}
         aria-labelledby={`action-${row.id}`}
-        onCancel={() => setConfirmAction(null)}
-        className="fixed inset-0 m-auto max-h-[85dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl bg-cream p-5 text-ink shadow-xl backdrop:bg-ink/40"
+        className="motion-dialog fixed inset-0 m-auto max-h-[85dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl bg-cream p-5 text-ink shadow-xl backdrop:bg-ink/40"
       >
         <h2 id={`action-${row.id}`} className="text-xl font-bold">
           {confirmAction === "record_refund"
@@ -550,7 +553,6 @@ function GuestCard({
             className={adminSecondary}
             onClick={() => {
               dialog.current?.close();
-              setConfirmAction(null);
             }}
           >
             Keep registration

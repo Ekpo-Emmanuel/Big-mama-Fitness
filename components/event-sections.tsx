@@ -9,21 +9,24 @@ import {
 import { content } from "@/lib/content";
 import { EventCta } from "./event-cta";
 import { Section, Eyebrow, headingClass } from "./ui";
+import { MotionValue, Reveal } from "./motion";
 
 type Props = { event: DanceEvent; sold: number };
 export function CapacityIndicator({ event, sold }: Props) {
   const state = eventState(event, sold);
   return (
     <p className="text-sm font-semibold">
-      {state === "open"
-        ? `${Math.max(0, event.capacity - sold)} spots remaining`
-        : {
-            sold_out: "This class is full",
-            completed: "This event has finished",
-            cancelled: "This event has been cancelled",
-            closed: "Registration is closed",
-            draft: "Event not published",
-          }[state]}
+      <MotionValue value={`${state}-${sold}`}>
+        {state === "open"
+          ? `${Math.max(0, event.capacity - sold)} spots remaining`
+          : {
+              sold_out: "This class is full",
+              completed: "This event has finished",
+              cancelled: "This event has been cancelled",
+              closed: "Registration is closed",
+              draft: "Event not published",
+            }[state]}
+      </MotionValue>
     </p>
   );
 }
@@ -36,7 +39,7 @@ export function EventHero({ event, sold }: Props) {
         </p>
       </div>
       <div className="grid items-center gap-10 lg:grid-cols-[1.12fr_1fr] lg:gap-14">
-        <div>
+        <div className="motion-hero">
           <Eyebrow>Less overthinking. More dancing.</Eyebrow>
           <h1 className="max-w-2xl font-display text-[clamp(2.5rem,5.8vw,5.6rem)] leading-[0.98] tracking-tight uppercase">
             {event.headline}
@@ -83,14 +86,14 @@ export function EventBenefits() {
         <h2 className={`${headingClass} max-w-2xl`}>
           Fitness you’ll actually look forward to.
         </h2>
-        <div className="mt-10 grid gap-8 sm:grid-cols-3">
+        <Reveal className="mt-10 grid gap-8 sm:grid-cols-3">
           {content.benefits.map((b) => (
             <article key={b.title} className="border-t border-ink/30 pt-5">
               <h3 className="font-display text-5xl uppercase">{b.title}</h3>
               <p className="mt-3 max-w-xs leading-relaxed">{b.body}</p>
             </article>
           ))}
-        </div>
+        </Reveal>
       </Section>
     </div>
   );
@@ -314,7 +317,10 @@ export function EventFaq({ event }: { event: DanceEvent }) {
             `${money(event)} ${event.currency}. Maximum ${event.capacity} Seats available.`,
           ],
         ].map(([q, a]) => (
-          <details key={q} className="group border-b border-ink/20 py-5">
+          <details
+            key={q}
+            className="motion-disclosure group border-b border-ink/20 py-5"
+          >
             <summary className="cursor-pointer py-1 text-lg font-bold focus-visible:outline-2 focus-visible:outline-offset-4">
               {q}
             </summary>

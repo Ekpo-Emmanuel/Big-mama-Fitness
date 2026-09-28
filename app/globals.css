@@ -4,6 +4,18 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  --motion-fast: 120ms;
+  --motion-normal: 200ms;
+  --motion-slow: 280ms;
+  --motion-press-duration: 100ms;
+  --motion-pending-duration: 900ms;
+  --motion-standard: cubic-bezier(0.77, 0, 0.175, 1);
+  --motion-enter: cubic-bezier(0.23, 1, 0.32, 1);
+  --motion-exit: cubic-bezier(0.23, 1, 0.32, 1);
+  --motion-emphasis: cubic-bezier(0.32, 0.72, 0, 1);
+  --motion-distance: 6px;
+  --motion-press-scale: 0.98;
+  --motion-surface-scale: 0.97;
   --color-cream: #fff9ef;
   --color-ink: #321b39;
   --color-orange: #f45d35;
@@ -13,6 +25,185 @@
   --font-display:
     var(--font-display-face), Impact, "Arial Narrow", var(--font-sans-face),
     sans-serif;
+}
+
+/* Motion is opt-in. Stable layout, live data and focus never wait for it. */
+@utility motion-press {
+  transition-property:
+    transform, opacity, background-color, color, border-color;
+  transition-duration: var(--motion-fast);
+  transition-timing-function: var(--motion-enter);
+  &:active:not(:disabled) {
+    transform: scale(var(--motion-press-scale));
+    transition-duration: var(--motion-press-duration);
+  }
+}
+
+@utility motion-state {
+  transition-property: opacity, background-color, color, border-color;
+  transition-duration: var(--motion-fast);
+  transition-timing-function: var(--motion-enter);
+}
+
+@utility motion-enter {
+  animation: motion-arrive var(--motion-normal) var(--motion-enter) both;
+}
+
+@utility motion-hero {
+  animation: motion-arrive var(--motion-slow) var(--motion-enter) both;
+}
+
+@keyframes motion-arrive {
+  from {
+    opacity: 0.8;
+    transform: translateY(var(--motion-distance));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Native dialogs retain focus/escape handling. Unsupported browsers close instantly. */
+.motion-dialog {
+  opacity: 0;
+  transform: scale(var(--motion-surface-scale));
+  transition:
+    opacity var(--motion-fast) var(--motion-exit),
+    transform var(--motion-fast) var(--motion-exit),
+    display var(--motion-fast) allow-discrete,
+    overlay var(--motion-fast) allow-discrete;
+}
+.motion-dialog[open] {
+  opacity: 1;
+  transform: scale(1);
+  transition-duration: var(--motion-normal);
+  transition-timing-function: var(--motion-enter);
+}
+.motion-dialog::backdrop {
+  opacity: 0;
+  transition:
+    opacity var(--motion-fast) var(--motion-exit),
+    display var(--motion-fast) allow-discrete,
+    overlay var(--motion-fast) allow-discrete;
+}
+.motion-dialog[open]::backdrop {
+  opacity: 1;
+  transition-duration: var(--motion-normal);
+}
+.motion-sheet {
+  transform: none;
+}
+.motion-sheet > .motion-sheet-panel {
+  transform: translateY(var(--motion-distance));
+  transition: transform var(--motion-fast) var(--motion-exit);
+}
+.motion-sheet[open] > .motion-sheet-panel {
+  transform: translateY(0);
+  transition-duration: var(--motion-normal);
+  transition-timing-function: var(--motion-emphasis);
+}
+
+/* Native disclosure remains usable with no script and in older browsers. */
+.motion-disclosure::details-content {
+  opacity: 0;
+  transition:
+    opacity var(--motion-fast) var(--motion-exit),
+    content-visibility var(--motion-fast) allow-discrete;
+}
+.motion-disclosure[open]::details-content {
+  opacity: 1;
+}
+.motion-menu::details-content {
+  transform-origin: bottom right;
+}
+.motion-menu > div {
+  transform-origin: bottom right;
+  transition:
+    opacity var(--motion-fast) var(--motion-exit),
+    transform var(--motion-fast) var(--motion-exit);
+}
+.motion-menu:not([open]) > div {
+  opacity: 0;
+  transform: translateY(var(--motion-distance))
+    scale(var(--motion-surface-scale));
+}
+.motion-menu[open] > div {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition-duration: var(--motion-normal);
+}
+
+@starting-style {
+  .motion-dialog[open] {
+    opacity: 0;
+    transform: scale(var(--motion-surface-scale));
+  }
+  .motion-dialog[open]::backdrop {
+    opacity: 0;
+  }
+  .motion-sheet[open] {
+    transform: none;
+  }
+  .motion-sheet[open] > .motion-sheet-panel {
+    transform: translateY(var(--motion-distance));
+  }
+  .motion-menu[open] > div {
+    opacity: 0;
+    transform: translateY(var(--motion-distance))
+      scale(var(--motion-surface-scale));
+  }
+}
+
+/* Loading is the only looping motion: it exists only while a request is pending. */
+.motion-loading {
+  animation: motion-pending var(--motion-pending-duration) linear infinite;
+}
+@keyframes motion-pending {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .motion-press:hover:not(:disabled) {
+    opacity: 0.92;
+  }
+}
+
+/* Stop CSS and WAAPI motion when the user changes their preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  *::backdrop,
+  ::details-content {
+    animation: none !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+  .motion-press:active:not(:disabled) {
+    transform: none;
+  }
+}
+html[data-motion-input="keyboard"]
+  :is(
+    .motion-press,
+    .motion-state,
+    .motion-enter,
+    .motion-hero,
+    .motion-dialog,
+    .motion-sheet-panel,
+    .motion-menu > div
+  ),
+html[data-motion-input="keyboard"] .motion-dialog::backdrop,
+html[data-motion-input="keyboard"] .motion-disclosure::details-content {
+  animation: none;
+  transition-duration: 0s;
+}
+html[data-motion-input="keyboard"] .motion-press:active:not(:disabled) {
+  transform: none;
 }
 
 :root {
