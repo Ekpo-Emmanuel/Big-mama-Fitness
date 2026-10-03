@@ -22,6 +22,7 @@ export default defineConfig({
       "tests/checkout-attempt.test.ts",
       "tests/dev-email-schedule.test.ts",
       "tests/feedback.test.ts",
+      "tests/next-class-list.test.ts",
     ],
     environment: "node",
   },

@@ -22,9 +22,23 @@ export async function saveLeadHandler(
       q.eq("sourceEventId", eventId).eq("email", data.email),
     )
     .unique();
-  if (duplicate) return;
   const now = new Date().toISOString();
   const attribution = JSON.stringify(data.attribution);
+  if (duplicate) {
+    const sourceContexts = Array.from(
+      new Set([...(duplicate.sourceContexts ?? []), data.sourceContext]),
+    );
+    await ctx.db.patch(duplicate._id, {
+      firstName: data.firstName,
+      lastName: data.lastName || duplicate.lastName,
+      phone: data.phone || duplicate.phone,
+      marketingConsent: duplicate.marketingConsent || data.marketingConsent,
+      marketingConsentAt:
+        duplicate.marketingConsentAt ?? (data.marketingConsent ? now : null),
+      sourceContexts,
+    });
+    return;
+  }
   await ctx.db.insert("futureEventLeads", {
     leadId: crypto.randomUUID(),
     sourceEventId: eventId,
@@ -36,6 +50,7 @@ export async function saveLeadHandler(
     marketingConsentAt: data.marketingConsent ? now : null,
     attribution,
     ...attributionFields(attribution),
+    sourceContexts: [data.sourceContext],
     createdAt: now,
   });
 }
@@ -66,6 +81,7 @@ export const list = query({
         marketing_consent: row.marketingConsent ? 1 : 0,
         marketing_consent_at: row.marketingConsentAt,
         attribution: row.attribution,
+        source_contexts: row.sourceContexts ?? [],
         created_at: row.createdAt,
       }));
   },

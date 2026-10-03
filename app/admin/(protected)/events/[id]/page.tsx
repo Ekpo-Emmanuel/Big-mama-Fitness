@@ -135,7 +135,7 @@ export default async function Overview({
             href={`${root}/leads`}
             className="flex min-h-16 items-center justify-between gap-3 py-3 text-sm"
           >
-            <span>Future-event leads</span>
+            <span>Next Class Leads</span>
             <span className="text-xl font-semibold tabular-nums">
               {data.leads} <span aria-hidden="true">›</span>
             </span>

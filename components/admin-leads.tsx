@@ -17,6 +17,7 @@ export type AdminLead = {
   marketing_consent: number;
   marketing_consent_at: string | null;
   attribution: string;
+  source_contexts: string[];
   created_at: string;
 };
 export function AdminLeads({
@@ -35,7 +36,7 @@ export function AdminLeads({
   return (
     <div className="space-y-4">
       <label className="block text-sm font-semibold">
-        Search future-event leads
+        Search next class leads
         <input
           type="search"
           value={query}
@@ -49,7 +50,7 @@ export function AdminLeads({
       </p>
       {!filtered.length && (
         <EmptyState
-          title={query ? "No matching leads" : "No future-event leads yet"}
+          title={query ? "No matching leads" : "No next class leads yet"}
         >
           {query
             ? "Try another name or contact detail."
@@ -96,6 +97,19 @@ export function AdminLeads({
                 </Detail>
                 <Detail label="Source">
                   {formatAttribution(row.attribution)}
+                </Detail>
+                <Detail label="Why they joined">
+                  {row.source_contexts.length
+                    ? row.source_contexts
+                        .map((context) =>
+                          context === "cant_make_current_date"
+                            ? "Couldn’t make this date"
+                            : context === "current_event_sold_out"
+                              ? "Current class sold out"
+                              : "Registration was closed",
+                        )
+                        .join(" · ")
+                    : "Not recorded"}
                 </Detail>
               </dl>
             </details>

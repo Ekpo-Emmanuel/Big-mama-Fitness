@@ -27,7 +27,10 @@ await context.addInitScript(() => {
   }).observe({ type: "layout-shift", buffered: true });
 });
 const page = await context.newPage();
-page.on("pageerror", (e) => { errors.push(e.message); console.error(e.message); });
+page.on("pageerror", (e) => {
+  errors.push(e.message);
+  console.error(e.message);
+});
 page.setDefaultTimeout(20000);
 const base = "http://127.0.0.1:3201";
 const go = async (path) => {
@@ -65,7 +68,9 @@ const routes = [
   ),
 ];
 let views = 0;
-for (const width of (process.argv.includes("--flows-only") ? [] : [320, 375, 390, 430, 1440])) {
+for (const width of process.argv.includes("--flows-only")
+  ? []
+  : [320, 375, 390, 430, 1440]) {
   await page.setViewportSize({ width, height: 900 });
   for (const route of routes) {
     await go(route);
@@ -223,9 +228,12 @@ await page
   .click();
 await expect(page).toHaveURL(/feedback$/);
 
-for (const route of ["/motion/feedback", "/motion/sold-out"]) {
+for (const route of ["/motion/feedback", "/motion", "/motion/sold-out"]) {
   await go(route);
+  let leadBody;
   await page.route("**/api/events/**", async (request) => {
+    if (request.request().url().endsWith("/leads"))
+      leadBody = request.request().postDataJSON();
     await new Promise((r) => setTimeout(r, 350));
     await request.fulfill({ json: { ok: true } });
   });
@@ -238,25 +246,45 @@ for (const route of ["/motion/feedback", "/motion/sold-out"]) {
   } else {
     for (const [name, value] of Object.entries({
       firstName: "Linda",
-      lastName: "Test",
       email: "linda@example.test",
-      phone: "2505550101",
     }))
       await page.locator(`[name="${name}"]`).fill(value);
     await page
-      .getByRole("button", { name: "Notify Me About the Next Class" })
+      .getByRole("button", {
+        name: /Notify Me About the Next Class|Join the Next Class List/,
+      })
       .click();
     await expect(page.getByRole("status").last()).toContainText(
-      "Your interest has been saved",
+      "You’re on the list",
     );
+    expect(leadBody.sourceContext).toBe(
+      route.endsWith("sold-out")
+        ? "current_event_sold_out"
+        : "cant_make_current_date",
+    );
+    expect(leadBody).not.toHaveProperty("name");
+    expect(leadBody).not.toHaveProperty("waiverAccepted");
+    const analyticsLead = await page.evaluate(() =>
+      window.dataLayer.findLast(
+        (item) => item.event === "future_event_lead_submit",
+      ),
+    );
+    expect(analyticsLead.lead_context).toBe(leadBody.sourceContext);
+    expect(analyticsLead).not.toHaveProperty("email");
+    expect(analyticsLead).not.toHaveProperty("firstName");
+    expect(analyticsLead).not.toHaveProperty("phone");
   }
-await page.unroute("**/api/events/**");
+  await page.unroute("**/api/events/**");
 }
 
 await go("/admin/events/preview/guests");
 await page.getByRole("button", { name: /^Incomplete / }).click();
-await expect(page.getByText("These checkouts are incomplete.", { exact: false })).toBeVisible();
-await expect(page.locator("article").first()).toContainText("Payment incomplete");
+await expect(
+  page.getByText("These checkouts are incomplete.", { exact: false }),
+).toBeVisible();
+await expect(page.locator("article").first()).toContainText(
+  "Payment incomplete",
+);
 
 await go("/motion");
 const benefits = page.locator(".bg-sun .grid").first();
@@ -283,7 +311,11 @@ await page.evaluate(() => {
   hero.style.animation = "";
 });
 await page.waitForTimeout(350);
-expect(await page.evaluate(() => window.motionShifts.reduce((sum, shift) => sum + shift, 0))).toBe(0);
+expect(
+  await page.evaluate(() =>
+    window.motionShifts.reduce((sum, shift) => sum + shift, 0),
+  ),
+).toBe(0);
 
 await page.emulateMedia({ reducedMotion: "reduce" });
 await go("/motion");

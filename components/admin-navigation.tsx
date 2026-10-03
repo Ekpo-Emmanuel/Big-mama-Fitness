@@ -18,7 +18,7 @@ export function AdminNavigation({ eventId }: { eventId: string }) {
     { path: "/guests", label: "Guests", icon: Users },
     { path: "/check-in", label: "Check-in", icon: ScanLine },
     { path: "/feedback", label: "Feedback", icon: MessageSquare },
-    { path: "/leads", label: "Future-event leads", icon: Heart },
+    { path: "/leads", label: "Next Class Leads", icon: Heart },
     { path: "/details", label: "Event details", icon: SlidersHorizontal },
   ];
   const link = (item: (typeof items)[number], mobile = false) => {

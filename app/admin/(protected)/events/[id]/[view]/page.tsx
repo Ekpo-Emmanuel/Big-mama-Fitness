@@ -59,7 +59,7 @@ export default async function EventView({
     notFound();
   const titles: Record<string, string> = {
     guests: "Guests",
-    leads: "Future-event leads",
+    leads: "Next Class Leads",
     "check-in": "Check-in",
     feedback: "Guest feedback",
     details: "Event details",

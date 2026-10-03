@@ -27,7 +27,8 @@ async function liveEvent(t: Awaited<ReturnType<typeof fixture>>) {
       .unique();
     return toDanceEvent(event!);
   });
-}test("verified payment confirms once; retry cannot duplicate sale or jobs", async () => {
+}
+test("verified payment confirms once; retry cannot duplicate sale or jobs", async () => {
   const t = await fixture();
   const row = await t.mutation((ctx) =>
     reserveHandler(ctx, initialEvent.id, registration()),
@@ -129,9 +130,7 @@ test("20 successful payments fill capacity; ticket 21 is rejected", async () => 
   assert.equal(sold, 20);
   await assert.rejects(
     () =>
-      t.mutation((ctx) =>
-        reserveHandler(ctx, initialEvent.id, registration()),
-      ),
+      t.mutation((ctx) => reserveHandler(ctx, initialEvent.id, registration())),
     /sold out|closed|no longer available/,
   );
 });
@@ -146,9 +145,7 @@ test("final seat hold blocks a competing checkout and failure releases only hold
   );
   await assert.rejects(
     () =>
-      t.mutation((ctx) =>
-        reserveHandler(ctx, initialEvent.id, registration()),
-      ),
+      t.mutation((ctx) => reserveHandler(ctx, initialEvent.id, registration())),
     /being checked out/,
   );
   await t.mutation((ctx) =>
@@ -197,9 +194,22 @@ test("duplicate registration does not reserve twice", async () => {
 });
 test("lead is separate from attendee and preserves all UTM fields", async () => {
   const t = await fixture();
-  const input = registration();
+  const input = {
+    ...registration(),
+    sourceContext: "cant_make_current_date" as const,
+  };
   await t.mutation((ctx) => saveLeadHandler(ctx, initialEvent.id, input));
-  await t.mutation((ctx) => saveLeadHandler(ctx, initialEvent.id, input));
+  await t.mutation((ctx) =>
+    saveLeadHandler(ctx, initialEvent.id, {
+      ...input,
+      firstName: "Updated",
+      email: input.email.toUpperCase(),
+      lastName: "",
+      phone: "",
+      marketingConsent: true,
+      sourceContext: "current_event_sold_out",
+    }),
+  );
   const counts = await t.query(async (ctx) => {
     const attendees = await ctx.db.query("attendees").collect();
     const leads = await ctx.db.query("futureEventLeads").collect();
@@ -208,6 +218,30 @@ test("lead is separate from attendee and preserves all UTM fields", async () => 
   assert.equal(counts.attendees, 0);
   assert.deepEqual(JSON.parse(counts.leads[0]!.attribution), input.attribution);
   assert.equal(counts.leadCount, 1);
+  assert.equal(counts.leads[0]!.firstName, "Updated");
+  assert.equal(counts.leads[0]!.lastName, input.lastName);
+  assert.equal(counts.leads[0]!.phone, input.phone);
+  assert.equal(counts.leads[0]!.marketingConsent, true);
+  assert.deepEqual(counts.leads[0]!.sourceContexts, [
+    "cant_make_current_date",
+    "current_event_sold_out",
+  ]);
+  const inventory = await t.query(async (ctx) => {
+    const event = await ctx.db
+      .query("events")
+      .withIndex("by_event_id", (q) => q.eq("eventId", initialEvent.id))
+      .unique();
+    return {
+      capacity: event!.capacity,
+      sold: event!.soldCount,
+      held: event!.heldCount,
+    };
+  });
+  assert.deepEqual(inventory, {
+    capacity: initialEvent.capacity,
+    sold: 0,
+    held: 0,
+  });
 });
 test("unpaid completion does not confirm and wrong payment amount rolls back", async () => {
   const t = await fixture();
@@ -276,9 +310,7 @@ test("check-in records time; cancellation and refunds never release sold invento
   assert.equal(end.sold, 20);
   await assert.rejects(
     () =>
-      t.mutation((ctx) =>
-        reserveHandler(ctx, initialEvent.id, registration()),
-      ),
+      t.mutation((ctx) => reserveHandler(ctx, initialEvent.id, registration())),
     /sold out|closed|no longer available/,
   );
   assert.equal(end.payment, "refunded");
@@ -352,13 +384,14 @@ test("same requestKey never inserts a second attendee", async () => {
     reserveHandler(ctx, initialEvent.id, input),
   );
   assert.equal(second.id, first.id);
-  const count = await t.query(async (ctx) =>
-    (
-      await ctx.db
-        .query("attendees")
-        .withIndex("by_event", (q) => q.eq("eventId", initialEvent.id))
-        .collect()
-    ).length,
+  const count = await t.query(
+    async (ctx) =>
+      (
+        await ctx.db
+          .query("attendees")
+          .withIndex("by_event", (q) => q.eq("eventId", initialEvent.id))
+          .collect()
+      ).length,
   );
   assert.equal(count, 1);
 });
@@ -381,9 +414,7 @@ test("pay after cancel retries confirms the same attendee", async () => {
   const first = await t.mutation((ctx) =>
     reserveHandler(ctx, initialEvent.id, input),
   );
-  await t.mutation((ctx) =>
-    reserveHandler(ctx, initialEvent.id, input),
-  );
+  await t.mutation((ctx) => reserveHandler(ctx, initialEvent.id, input));
   await pay(t, first.id, "pay_after_cancel");
   const end = await t.query(async (ctx) => {
     const rows = await ctx.db
@@ -491,13 +522,14 @@ test("expired hold sold out does not duplicate attendee", async () => {
     () => t.mutation((ctx) => reserveHandler(ctx, initialEvent.id, input)),
     /sold out/,
   );
-  const count = await t.query(async (ctx) =>
-    (
-      await ctx.db
-        .query("attendees")
-        .withIndex("by_event", (q) => q.eq("eventId", initialEvent.id))
-        .collect()
-    ).length,
+  const count = await t.query(
+    async (ctx) =>
+      (
+        await ctx.db
+          .query("attendees")
+          .withIndex("by_event", (q) => q.eq("eventId", initialEvent.id))
+          .collect()
+      ).length,
   );
   assert.equal(count, 1);
 });
@@ -578,9 +610,7 @@ test("event time change during held checkout requires review", async () => {
 test("sold out while held returns a specific message", async () => {
   const t = await fixture();
   const heldInput = registration();
-  await t.mutation((ctx) =>
-    reserveHandler(ctx, initialEvent.id, heldInput),
-  );
+  await t.mutation((ctx) => reserveHandler(ctx, initialEvent.id, heldInput));
   for (let i = 0; i < 19; i++) {
     const row = await t.mutation((ctx) =>
       reserveHandler(ctx, initialEvent.id, registration()),
@@ -595,10 +625,7 @@ test("sold out while held returns a specific message", async () => {
     await ctx.db.patch(event!._id, { status: "sold_out" });
   });
   await assert.rejects(
-    () =>
-      t.mutation((ctx) =>
-        reserveHandler(ctx, initialEvent.id, heldInput),
-      ),
+    () => t.mutation((ctx) => reserveHandler(ctx, initialEvent.id, heldInput)),
     /sold out/,
   );
 });
@@ -742,13 +769,14 @@ test("new requestKey after paid creates a second pending attendee", async () => 
   assert.notEqual(next.id, paid.id);
   assert.equal(next.inventory_status, "held");
   assert.equal(next.payment_status, "pending");
-  const count = await t.query(async (ctx) =>
-    (
-      await ctx.db
-        .query("attendees")
-        .withIndex("by_event", (q) => q.eq("eventId", initialEvent.id))
-        .collect()
-    ).length,
+  const count = await t.query(
+    async (ctx) =>
+      (
+        await ctx.db
+          .query("attendees")
+          .withIndex("by_event", (q) => q.eq("eventId", initialEvent.id))
+          .collect()
+      ).length,
   );
   assert.equal(count, 2);
 });

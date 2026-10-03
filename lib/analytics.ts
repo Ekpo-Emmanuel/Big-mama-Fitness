@@ -27,6 +27,8 @@ type Properties = {
   ticket_price?: number;
   currency?: string;
   spots_remaining?: number;
+  lead_context?:
+    "cant_make_current_date" | "current_event_sold_out" | "registration_closed";
 };
 declare global {
   interface Window {
@@ -43,6 +45,7 @@ export function trackEvent(name: BrowserEvent, properties: Properties = {}) {
     ticket_price: properties.ticket_price,
     currency: properties.currency,
     spots_remaining: properties.spots_remaining,
+    lead_context: properties.lead_context,
     ...analyticsAttribution(attribution),
     page_location: window.location.origin + window.location.pathname,
     page_referrer: "",

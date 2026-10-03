@@ -158,6 +158,15 @@ export default defineSchema({
     utmMedium: v.optional(v.string()),
     utmCampaign: v.optional(v.string()),
     utmContent: v.optional(v.string()),
+    sourceContexts: v.optional(
+      v.array(
+        v.union(
+          v.literal("cant_make_current_date"),
+          v.literal("current_event_sold_out"),
+          v.literal("registration_closed"),
+        ),
+      ),
+    ),
     createdAt: v.string(),
   })
     .index("by_lead_id", ["leadId"])

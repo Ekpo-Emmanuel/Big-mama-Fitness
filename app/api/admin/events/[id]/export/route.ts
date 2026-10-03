@@ -42,6 +42,7 @@ export async function GET(
             "marketing_consent",
             "marketing_consent_at",
             "attribution",
+            "source_contexts",
             "created_at",
           ];
     const rows =

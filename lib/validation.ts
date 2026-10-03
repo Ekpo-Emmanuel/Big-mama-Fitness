@@ -60,12 +60,33 @@ export const registrationFormSchema = registrationSchema.pick({
   marketingConsent: true,
 });
 
-export const leadSchema = z.object(contact);
+export const leadContextSchema = z.enum([
+  "cant_make_current_date",
+  "current_event_sold_out",
+  "registration_closed",
+]);
+export type LeadContext = z.infer<typeof leadContextSchema>;
+
+export const leadSchema = z.object({
+  firstName: contact.firstName,
+  lastName: z.string().trim().max(80).default(""),
+  email: contact.email,
+  phone: z
+    .string()
+    .trim()
+    .max(25)
+    .refine(
+      (value) => !value || /^\+?[\d\s().-]{7,25}$/.test(value),
+      "Enter a valid phone number (digits, spaces, and + ( ) - . allowed).",
+    )
+    .default(""),
+  marketingConsent: contact.marketingConsent,
+  attribution: attributionSchema.default({}),
+  sourceContext: leadContextSchema.default("registration_closed"),
+});
 
 export const feedbackSchema = z.object({
-  token: z
-    .string()
-    .regex(/^[a-f0-9]{64}$/, "This feedback link is not valid."),
+  token: z.string().regex(/^[a-f0-9]{64}$/, "This feedback link is not valid."),
   rating: z.number().int().min(1).max(5),
   sentiment: z
     .enum(["loved", "good", "okay", "not_for_me"])

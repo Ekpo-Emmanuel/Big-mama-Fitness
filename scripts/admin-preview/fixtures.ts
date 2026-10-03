@@ -142,7 +142,11 @@ export async function fetchAuthQuery(key: string): Promise<any> {
     return empty
       ? []
       : [
-          { ...base, created_at: base.registered_at },
+          {
+            ...base,
+            created_at: base.registered_at,
+            source_contexts: ["cant_make_current_date"],
+          },
           {
             ...base,
             id: "lead-2",
@@ -150,6 +154,7 @@ export async function fetchAuthQuery(key: string): Promise<any> {
             last_name: "Park",
             email: "sofia@example.test",
             marketing_consent: 0,
+            source_contexts: ["current_event_sold_out"],
           },
         ];
 }

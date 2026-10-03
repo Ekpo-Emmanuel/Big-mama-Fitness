@@ -119,7 +119,7 @@ async function main() {
   else
     content = (
       <LandingPage
-        event={event}
+        event={{ ...event, registrationOpen: path[1] !== "closed" }}
         sold={path[1] === "sold-out" ? event.capacity : 2}
       />
     );
