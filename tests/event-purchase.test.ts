@@ -43,11 +43,13 @@ test("purchase fingerprint ignores non-material fields", () => {
 });
 
 test("availability messages are specific", () => {
+  const now = Date.parse("2026-10-01");
   assert.equal(
     registrationAvailabilityMessage(
       { ...initialEvent, status: "sold_out" },
       20,
       0,
+      now,
     ),
     "This class just sold out.",
   );
@@ -56,11 +58,30 @@ test("availability messages are specific", () => {
       { ...initialEvent, status: "cancelled" },
       0,
       0,
+      now,
     ),
     "This event has been cancelled. Registration is closed.",
   );
   assert.equal(
-    registrationAvailabilityMessage(initialEvent, 19, 1),
+    registrationAvailabilityMessage(initialEvent, 19, 1, now),
+    "The remaining spots are being checked out. Please try again shortly.",
+  );
+  assert.equal(
+    registrationAvailabilityMessage(
+      { ...initialEvent, capacity: 15 },
+      15,
+      0,
+      now,
+    ),
+    "This class just sold out.",
+  );
+  assert.equal(
+    registrationAvailabilityMessage(
+      { ...initialEvent, capacity: 15 },
+      14,
+      1,
+      now,
+    ),
     "The remaining spots are being checked out. Please try again shortly.",
   );
 });

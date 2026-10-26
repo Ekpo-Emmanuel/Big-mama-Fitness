@@ -126,3 +126,13 @@ export function eventTime(event: DanceEvent, value = event.startsAt) {
     timeZone: event.timezone,
   }).format(new Date(value));
 }
+export function eventCalendarDate(
+  event: Pick<DanceEvent, "startsAt" | "timezone">,
+) {
+  return new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: event.timezone,
+  }).format(new Date(event.startsAt));
+}

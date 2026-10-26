@@ -1,4 +1,6 @@
 import { analyticsAttribution, getAttribution } from "./attribution";
+import { eventCalendarDate } from "./event";
+import { findKnownEvent, trackingEventForPath } from "./known-events";
 
 const GTM_ID_RE = /^GTM-[A-Z0-9]+$/;
 const GA_ID_RE = /^G-[A-Z0-9]+$/;
@@ -23,6 +25,7 @@ export type BrowserEvent =
   | "feedback_submitted";
 type Properties = {
   event_id?: string;
+  event_date?: string;
   event_name?: string;
   ticket_price?: number;
   currency?: string;
@@ -39,8 +42,12 @@ declare global {
 export function trackEvent(name: BrowserEvent, properties: Properties = {}) {
   if (typeof window === "undefined") return;
   const attribution = getAttribution();
+  const event =
+    findKnownEvent(properties.event_id) ??
+    trackingEventForPath(window.location.pathname);
   const safe = {
-    event_id: properties.event_id,
+    event_id: properties.event_id ?? event?.id,
+    event_date: event ? eventCalendarDate(event) : properties.event_date,
     event_name: properties.event_name,
     ticket_price: properties.ticket_price,
     currency: properties.currency,

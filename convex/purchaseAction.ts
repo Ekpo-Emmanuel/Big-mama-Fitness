@@ -2,6 +2,7 @@ import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { analyticsAttribution, cleanAttribution } from "../lib/attribution";
+import { eventCalendarDate } from "../lib/event";
 
 export const send = internalAction({
   args: { jobId: v.string() },
@@ -39,6 +40,10 @@ export const send = internalAction({
                   value: snapshot.amount / 100,
                   currency: snapshot.currency,
                   event_id: snapshot.eventId,
+                  event_date: eventCalendarDate({
+                    startsAt: snapshot.startsAt,
+                    timezone: snapshot.timezone,
+                  }),
                   event_name: snapshot.eventName,
                   session_id:
                     attribution.session_id ||

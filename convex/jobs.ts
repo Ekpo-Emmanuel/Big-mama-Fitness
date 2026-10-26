@@ -490,6 +490,8 @@ export const purchaseSnapshot = internalMutation({
       attendeeId: row.attendeeId,
       eventId: eventRow.eventId,
       eventName: eventRow.name,
+      startsAt: eventRow.startsAt,
+      timezone: eventRow.timezone,
       amount: row.amountPaidCents,
       currency: row.currency,
       paymentIntent: row.stripePaymentIntentId,
