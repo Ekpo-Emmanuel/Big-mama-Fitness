@@ -11,7 +11,11 @@ test("event seed and inventory are durable and repeatable", async () => {
       .query("events")
       .withIndex("by_slug", (q) => q.eq("slug", initialEvent.slug))
       .unique();
-    return { price: row!.priceCents, sold: row!.soldCount, held: row!.heldCount };
+    return {
+      price: row!.priceCents,
+      sold: row!.soldCount,
+      held: row!.heldCount,
+    };
   });
   assert.equal(data.price, 1000);
   assert.deepEqual({ sold: data.sold, held: data.held }, { sold: 0, held: 0 });
@@ -28,4 +32,9 @@ test("public states prioritize cancellation and completion over inventory", () =
     eventState(initialEvent, 20, Date.parse("2026-11-01")),
     "completed",
   );
+  assert.equal(
+    eventState({ ...initialEvent, capacity: 15 }, 15, now),
+    "sold_out",
+  );
+  assert.equal(eventState({ ...initialEvent, capacity: 15 }, 14, now), "open");
 });

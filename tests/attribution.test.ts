@@ -55,6 +55,20 @@ test("attribution rejects contact-like values and analytics only forwards known 
       utm_content: "gym",
     },
   );
+  assert.deepEqual(
+    analyticsAttribution({
+      utm_source: "instagram",
+      utm_medium: "social",
+      utm_campaign: "november21",
+      utm_content: "reel1",
+    }),
+    {
+      utm_source: "instagram",
+      utm_medium: "social",
+      utm_campaign: "november21",
+      utm_content: "reel1",
+    },
+  );
 });
 test("analytics session expires separately from first-touch campaign attribution", () => {
   const now = 2000000000000;

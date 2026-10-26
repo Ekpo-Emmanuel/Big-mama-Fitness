@@ -57,6 +57,54 @@ export const campaigns = {
     utm_campaign: "october17",
     utm_content: "invite",
   },
+  "poster-gym-november21": {
+    utm_source: "poster",
+    utm_medium: "qr",
+    utm_campaign: "november21",
+    utm_content: "gym_lobby",
+  },
+  "poster-gym-short-november21": {
+    utm_source: "poster",
+    utm_medium: "qr",
+    utm_campaign: "november21",
+    utm_content: "gym",
+  },
+  "poster-workplace-november21": {
+    utm_source: "poster",
+    utm_medium: "qr",
+    utm_campaign: "november21",
+    utm_content: "workplace",
+  },
+  "poster-cafe-november21": {
+    utm_source: "poster",
+    utm_medium: "qr",
+    utm_campaign: "november21",
+    utm_content: "cafe",
+  },
+  "instagram-november21": {
+    utm_source: "instagram",
+    utm_medium: "social",
+    utm_campaign: "november21",
+    utm_content: "profile",
+  },
+  "instagram-reel-november21": {
+    utm_source: "instagram",
+    utm_medium: "social",
+    utm_campaign: "november21",
+    utm_content: "reel1",
+  },
+  "facebook-november21": {
+    utm_source: "facebook",
+    utm_medium: "social",
+    utm_campaign: "november21",
+    utm_content: "post",
+  },
+  "direct-message-november21": {
+    utm_source: "direct-message",
+    utm_medium: "message",
+    utm_campaign: "november21",
+    utm_content: "invite",
+  },
 };
 export function cleanAttribution(input: Record<string, unknown>): Attribution {
   const result: Attribution = {};

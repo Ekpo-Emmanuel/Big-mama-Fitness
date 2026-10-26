@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { test } from "vitest";
 import assert from "node:assert/strict";
 import { eventConfigSchema } from "../lib/event-config";
@@ -59,4 +60,23 @@ test("event configuration validates schedule, hard capacity, waiver versions, an
     return toDanceEvent(row!).headline;
   });
   assert.equal(headline, "Updated headline");
+});
+
+test("November event config is valid and stays a separate unpublished draft", () => {
+  const nov = eventConfigSchema.parse(
+    JSON.parse(
+      readFileSync(
+        new URL("../events/afro-nov-2026.json", import.meta.url),
+        "utf8",
+      ),
+    ),
+  );
+  assert.equal(nov.id, "afro-nov-2026");
+  assert.equal(nov.slug, "afro-dance-fitness-nov-21");
+  assert.equal(nov.capacity, 15);
+  assert.equal(nov.status, "draft");
+  assert.equal(nov.isPublished, false);
+  assert.equal(nov.registrationOpen, false);
+  assert.notEqual(nov.id, initialEvent.id);
+  assert.equal(initialEvent.capacity, 20);
 });

@@ -48,7 +48,7 @@ for (const state of ["sold", "cancelled", "completed", "admin"]) {
     inputJson: JSON.stringify(event),
     internalSecret: secret,
   });
-  const count = state === "sold" ? 20 : state === "admin" ? 1 : 0;
+  const count = state === "sold" ? event.capacity : state === "admin" ? 1 : 0;
   for (let i = 0; i < count; i++) {
     const row = await client.mutation(api.booking.reserve, {
       eventId: event.id,
