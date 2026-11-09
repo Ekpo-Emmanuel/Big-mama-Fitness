@@ -72,3 +72,19 @@ export async function processPayment(
     }),
   );
 }
+
+export type ConfirmationRow = {
+  payment_status: string;
+  attendee_status: string;
+  event_id: string;
+  stripe_session_id: string | null;
+};
+
+export async function loadConfirmation(token: string, eventId?: string) {
+  return withConvex(() =>
+    convexClient().query(api.booking.confirmation, {
+      token,
+      ...(eventId ? { eventId } : {}),
+    }),
+  ) as Promise<ConfirmationRow | null>;
+}

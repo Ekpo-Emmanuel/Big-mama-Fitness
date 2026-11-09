@@ -9,7 +9,7 @@
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 
-const EVENT_ID = "afro-oct-2026";
+const EVENT_ID = "afro-nov-2026";
 const KEEP = "adf910b3-bc4c-4503-865b-2ce523c5943e";
 const DELETE = [
   "6b39c5f0-8bd6-4be2-a060-0a422f251629",

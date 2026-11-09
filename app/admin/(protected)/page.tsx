@@ -9,14 +9,24 @@ import {
   StatusBadge,
   adminPanel,
 } from "@/components/admin-ui";
+import { adminButton } from "@/components/admin-ui";
 import { ArrowUpRight } from "lucide-react";
 export default async function Admin() {
   await requireAdmin();
   const events: DanceEvent[] = await fetchAuthQuery(api.events.listAll, {});
+  const template =
+    events.find((event) => event.status === "published") ?? events[0];
   return (
     <AdminPage
       title="Your events"
       description="Everything you need to welcome your guests. Choose an event to get started."
+      actions={
+        template ? (
+          <Link href="/admin/new" className={adminButton}>
+            Create event
+          </Link>
+        ) : undefined
+      }
     >
       <div className="grid gap-4 sm:grid-cols-2">
         {events.length === 0 ? (

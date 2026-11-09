@@ -17,6 +17,7 @@
     "format": "prettier --write app components lib scripts tests e2e convex playwright.config.ts next.config.ts",
     "admin:create": "node --env-file-if-exists=.env.local --import tsx scripts/create-organizer.ts",
     "event:config": "node --env-file-if-exists=.env.local --import tsx scripts/event-config.ts",
+    "event:nov": "node --env-file-if-exists=.env.local --import tsx scripts/seed-nov-event.ts",
     "stripe:reconcile": "node --env-file-if-exists=.env.local --import tsx scripts/reconcile.ts",
     "dev:dedupe-pending": "node --env-file-if-exists=.env.local --import tsx scripts/dedupe-pending-attendees.ts",
     "dev:email-schedule": "node --env-file-if-exists=.env.local --import tsx scripts/dev-email-schedule-test.ts",

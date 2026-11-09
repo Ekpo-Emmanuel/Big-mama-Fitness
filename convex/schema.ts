@@ -230,4 +230,9 @@ export default defineSchema({
   })
     .index("by_auth_user_id", ["authUserId"])
     .index("by_email", ["email"]),
+  siteSettings: defineTable({
+    key: v.string(),
+    featuredEventId: v.string(),
+    updatedAt: v.string(),
+  }).index("by_key", ["key"]),
 });

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getEvent } from "@/lib/db";
-import { api, convexClient, withConvex } from "@/lib/convex";
+import { loadConfirmation } from "@/lib/booking";
+import { confirmPaidCheckout } from "@/lib/confirm-checkout";
 import { RegistrationConfirmation } from "@/components/registration-confirmation";
 import { ConfirmationRefresh } from "@/components/confirmation-refresh";
 import { ClearActiveRegistration } from "@/components/clear-active-registration";
@@ -20,23 +21,33 @@ export default async function Success({
   const event = await getEvent((await params).slug);
   if (!event) notFound();
   const { token } = await searchParams;
-  const row =
+  let row =
     token && /^[a-f0-9]{64}$/.test(token)
-      ? await withConvex(() =>
-          convexClient().query(api.booking.confirmation, {
-            token,
-            eventId: event.id,
-          }),
-        )
+      ? await loadConfirmation(token, event.id)
       : null;
+  if (row?.payment_status === "pending") {
+    try {
+      row = await confirmPaidCheckout(row);
+    } catch {
+      // Webhook may still complete it; keep polling.
+    }
+    if (row.payment_status === "pending") {
+      row = (await loadConfirmation(token!, event.id)) ?? row;
+    }
+  }
+  const displayEvent =
+    row?.event_id && row.event_id !== event.id
+      ? ((await getEvent(row.event_id)) ?? event)
+      : event;
+  const pending = row?.payment_status === "pending";
   return (
     <main id="main">
-      <ConfirmationRefresh pending={row?.payment_status === "pending"} />
+      <ConfirmationRefresh pending={pending} />
       <ClearActiveRegistration
-        eventId={event.id}
+        eventId={displayEvent.id}
         paid={row?.payment_status === "paid"}
       />
-      <RegistrationConfirmation event={event} row={row} />
+      <RegistrationConfirmation event={displayEvent} row={row} />
     </main>
   );
 }

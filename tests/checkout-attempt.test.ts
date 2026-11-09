@@ -8,7 +8,7 @@ import {
   REQUEST_KEY_QUERY,
 } from "../lib/checkout-attempt";
 
-const eventId = "afro-oct-2026";
+const eventId = "afro-nov-2026";
 const keyA = "11111111-1111-4111-8111-111111111111";
 const keyB = "22222222-2222-4222-8222-222222222222";
 

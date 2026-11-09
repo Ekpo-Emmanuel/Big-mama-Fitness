@@ -20,8 +20,8 @@ const row = {
 
 test("checkout product copy uses event schedule and city, not attendee data", () => {
   const description = checkoutProductDescription(initialEvent);
-  assert.match(description, /Saturday, October 17, 2026/);
-  assert.match(description, /5:00/);
+  assert.match(description, /Saturday, November 21, 2026/);
+  assert.match(description, /5:30/);
   assert.match(description, /6:30/);
   assert.match(description, /Nanaimo, BC/);
   assert.equal(description.includes("private@example.com"), false);

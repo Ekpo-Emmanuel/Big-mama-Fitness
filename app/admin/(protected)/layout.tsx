@@ -26,7 +26,16 @@ export default async function AdminLayout({
               Organizer workspace
             </span>
           </Link>
-          <SignOutButton />
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/new"
+              className="inline-flex min-h-11 shrink-0 items-center rounded-xl bg-ink px-3 text-sm font-semibold text-white"
+            >
+              <span className="sm:hidden">New</span>
+              <span className="hidden sm:inline">Create event</span>
+            </Link>
+            <SignOutButton />
+          </div>
         </div>
       </header>
       <main id="main">{children}</main>

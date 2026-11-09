@@ -7,6 +7,7 @@ import {
   type DanceEvent,
   eventDateFull,
   eventTime,
+  initialEvent,
   money,
 } from "@/lib/event";
 
@@ -207,8 +208,15 @@ function Shell({
   );
 }
 
-export async function siteOgImage() {
+export async function siteOgImage(event: DanceEvent = initialEvent) {
   const logoSrc = await getLogoDataUri();
+  const shortDate = new Intl.DateTimeFormat("en-CA", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    timeZone: event.timezone,
+  }).format(new Date(event.startsAt));
+  const timeLabel = `${eventTime(event)}–${eventTime(event, event.endsAt)}`;
 
   return new ImageResponse(
     <Shell logoSrc={logoSrc}>
@@ -234,15 +242,15 @@ export async function siteOgImage() {
             maxWidth: 720,
           }}
         >
-          Afro Dance Fitness Nanaimo
+          {event.name}
         </div>
         <AccentBars />
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <div style={{ fontSize: 34, fontWeight: 700 }}>Saturday, Oct 17</div>
+        <div style={{ fontSize: 34, fontWeight: 700 }}>{shortDate}</div>
         <div style={{ fontSize: 30, fontWeight: 600, color: COLORS.muted }}>
-          5:00–6:30 PM
+          {timeLabel}
         </div>
         <div
           style={{
@@ -252,7 +260,7 @@ export async function siteOgImage() {
             color: COLORS.plum,
           }}
         >
-          $10 • Beginner-friendly
+          {`${money(event)} • Beginner-friendly`}
         </div>
         <div
           style={{

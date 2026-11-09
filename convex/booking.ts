@@ -31,18 +31,23 @@ export const getAttendee = query({
 });
 
 export const confirmation = query({
-  args: { token: v.string(), eventId: v.string() },
+  args: { token: v.string(), eventId: v.optional(v.string()) },
   handler: async (ctx, { token, eventId }) => {
-    const row = await ctx.db
+    const matches = await ctx.db
       .query("attendees")
       .withIndex("by_confirmation_token", (q) =>
         q.eq("confirmationToken", token),
       )
-      .unique();
-    if (!row || row.eventId !== eventId) return null;
+      .collect();
+    const row =
+      (eventId && matches.find((item) => item.eventId === eventId)) ||
+      matches[0];
+    if (!row) return null;
     return {
       payment_status: row.paymentStatus,
       attendee_status: row.attendeeStatus,
+      event_id: row.eventId,
+      stripe_session_id: row.stripeSessionId,
     };
   },
 });

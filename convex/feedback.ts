@@ -77,10 +77,7 @@ export const resolve = query({
     now: v.optional(v.number()),
   },
   handler: async (ctx, { slug, token, now }) => {
-    const event = await ctx.db
-      .query("events")
-      .withIndex("by_slug", (q) => q.eq("slug", slug))
-      .unique();
+    const event = await findEvent(ctx, slug);
     if (!event) return { status: "invalid" as const };
     const attendee = await attendeeByFeedbackToken(ctx, token);
     if (!attendee) return { status: "invalid" as const };

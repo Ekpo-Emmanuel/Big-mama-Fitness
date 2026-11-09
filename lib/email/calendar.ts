@@ -2,7 +2,10 @@ import type { DanceEvent } from "../event";
 import { publicSiteOrigin } from "./origin";
 
 export function eventVenue(event: DanceEvent) {
-  return `${event.addressLine1}, ${event.city}, ${event.province} ${event.postalCode}`;
+  const street = event.venueName
+    ? `${event.venueName}, ${event.addressLine1}`
+    : event.addressLine1;
+  return `${street}, ${event.city}, ${event.province} ${event.postalCode}`;
 }
 
 export function eventPageUrl(event: DanceEvent) {
@@ -79,20 +82,15 @@ function icsEscape(value: string) {
     .replaceAll(/\r\n|\n|\r/g, "\\n");
 }
 
-function icsLocalStamp(iso: string, timeZone: string) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(new Date(iso));
-  const pick = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((part) => part.type === type)?.value || "";
-  return `${pick("year")}${pick("month")}${pick("day")}T${pick("hour")}${pick("minute")}${pick("second")}`;
+function icsLocalStamp(iso: string, _timeZone: string) {
+  // Use the stored wall-clock fields so ICS matches the event config offset,
+  // even when the host ICU TZ database disagrees about Pacific Standard.
+  const match = iso.match(
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/,
+  );
+  if (!match) throw new Error(`Invalid event timestamp: ${iso}`);
+  const [, year, month, day, hour, minute, second] = match;
+  return `${year}${month}${day}T${hour}${minute}${second}`;
 }
 
 function foldLine(line: string) {

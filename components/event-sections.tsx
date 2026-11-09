@@ -178,7 +178,14 @@ export function EventSchedule({ event }: { event: DanceEvent }) {
       "Take that feeling home",
       "Your evening is just getting started.",
     ],
-  ];
+  ].filter((row, index, rows) => {
+    // Collapse duplicate timestamps when doors == workout start or end == workout end.
+    if (index === 0) return true;
+    return row[0] !== rows[index - 1][0];
+  });
+  const locationLine = event.venueName
+    ? `${event.venueName}, ${event.addressLine1}`
+    : event.addressLine1;
   return (
     <Section className="grid gap-10 md:grid-cols-2">
       <div>
@@ -193,7 +200,7 @@ export function EventSchedule({ event }: { event: DanceEvent }) {
         <p className="mt-6 leading-relaxed">
           {eventDate(event)}
           <br />
-          {event.addressLine1}
+          {locationLine}
           <br />
           {event.city}, {event.province} {event.postalCode}
         </p>

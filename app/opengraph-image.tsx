@@ -1,11 +1,13 @@
 import { siteOgImage, ogSize } from "@/lib/og";
+import { getFeaturedEvent } from "@/lib/db";
+import { initialEvent } from "@/lib/event";
 
 export const runtime = "nodejs";
-export const alt =
-  "Afro Dance Fitness Nanaimo with Big Mama Fitness — Saturday, Oct 17";
+export const alt = `${initialEvent.name} with Big Mama Fitness`;
 export const size = ogSize;
 export const contentType = "image/png";
 
 export default async function OpenGraphImage() {
-  return siteOgImage();
+  const event = await getFeaturedEvent();
+  return siteOgImage(event);
 }

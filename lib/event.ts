@@ -35,9 +35,11 @@ export interface DanceEvent {
   waiverVersion: string;
   waiverText: string;
 }
-export const initialEvent: DanceEvent = {
+
+/** October 17, 2026 class — kept for admin history / completed-event links. */
+export const octoberEvent: DanceEvent = {
   id: "afro-oct-2026",
-  slug: "afro-dance-fitness",
+  slug: "afro-dance-fitness-oct-17",
   name: "Afro Dance Fitness Nanaimo",
   shortName: "Afro Dance Fitness",
   headline: "Your Saturday workout should feel like a party.",
@@ -60,9 +62,9 @@ export const initialEvent: DanceEvent = {
   currency: "CAD",
   capacity: 20,
   targetAttendance: 15,
-  status: "published",
+  status: "completed",
   isPublished: true,
-  registrationOpen: true,
+  registrationOpen: false,
   instructorName: "Brenda",
   instructorBio:
     "Join me for a welcoming class built around Afro music, movement, and finding your own pace.",
@@ -85,6 +87,49 @@ I understand that this waiver does not replace medical advice and that no partic
 
 By checking the box below, I confirm that I have read and understood this waiver and voluntarily agree to its terms.`,
 };
+
+/** Active / seeded event — Saturday, November 21, 2026. */
+export const initialEvent: DanceEvent = {
+  id: "afro-nov-2026",
+  slug: "afro-dance-fitness",
+  name: "Afro Dance Fitness Nanaimo",
+  shortName: "Afro Dance Fitness",
+  headline: "Your Saturday workout should feel like a party.",
+  subheadline:
+    "Afrobeats. Easy-to-follow movement. A room full of good energy. Join Brenda for a beginner-friendly dance workout in Nanaimo.",
+  description:
+    "Approximately 60 minutes of guided Afro-inspired movement. Open to everyone.",
+  // America/Vancouver is on PST (-08:00) by Nov 21.
+  // Doors and workout both start 5:30 PM; class ends 6:30 PM.
+  startsAt: "2026-11-21T17:30:00-08:00",
+  endsAt: "2026-11-21T18:30:00-08:00",
+  workoutStartsAt: "2026-11-21T17:30:00-08:00",
+  workoutEndsAt: "2026-11-21T18:30:00-08:00",
+  timezone: "America/Vancouver",
+  venueName: "Studio 1",
+  addressLine1: "1969 Boxwood Rd",
+  city: "Nanaimo",
+  province: "BC",
+  postalCode: "V9S 5X9",
+  country: "CA",
+  priceCents: 1000,
+  currency: "CAD",
+  capacity: 15,
+  targetAttendance: 11,
+  status: "published",
+  isPublished: true,
+  registrationOpen: true,
+  instructorName: "Brenda",
+  instructorBio:
+    "Join me for a welcoming class built around Afro music, movement, and finding your own pace.",
+  contactEmail: "",
+  heroImageUrl: "/afro-fit-hero-img.png",
+  heroVideoUrl: "",
+  instructorImageUrl: "/instructor.png",
+  waiverVersion: "bmf-afro-dance-2026-11-v1",
+  waiverText: octoberEvent.waiverText,
+};
+
 export function eventState(event: DanceEvent, sold: number, now = Date.now()) {
   if (!event.isPublished || event.status === "draft") return "draft";
   if (event.status === "cancelled") return "cancelled";
@@ -119,10 +164,20 @@ export function eventDateFull(event: DanceEvent) {
     timeZone: event.timezone,
   }).format(new Date(event.startsAt));
 }
-export function eventTime(event: DanceEvent, value = event.startsAt) {
-  return new Intl.DateTimeFormat("en-CA", {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: event.timezone,
-  }).format(new Date(value));
+export function eventTime(_event: DanceEvent, value = _event.startsAt) {
+  // Format from stored Vancouver wall clock (…T17:30:00-08:00), not Intl.
+  // Avoids host TZ-data bugs that mis-label Pacific Standard as -07.
+  const match = value.match(/T(\d{2}):(\d{2})/);
+  if (!match) {
+    return new Intl.DateTimeFormat("en-CA", {
+      hour: "numeric",
+      minute: "2-digit",
+      timeZone: _event.timezone,
+    }).format(new Date(value));
+  }
+  let hour = Number(match[1]);
+  const minute = match[2];
+  const period = hour >= 12 ? "p.m." : "a.m.";
+  hour = hour % 12 || 12;
+  return `${hour}:${minute} ${period}`;
 }

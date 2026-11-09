@@ -6,6 +6,9 @@ export const adminSecondary =
   "motion-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-ink/20 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-lilac/30 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink disabled:opacity-50";
 export const adminPanel =
   "rounded-2xl border border-ink/10 bg-white p-5 sm:p-6";
+export const adminField =
+  "min-h-12 w-full rounded-xl border border-ink/15 bg-white px-3 py-3 text-base text-ink [color-scheme:light] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink";
+export const adminLabel = "grid gap-2 text-sm font-semibold";
 
 const labels: Record<string, string> = {
   paid: "Paid",

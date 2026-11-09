@@ -49,8 +49,8 @@ test("share metadata uses Big Mama Fitness branding and dynamic OG routes", () =
       "Afro Dance Fitness Nanaimo | Big Mama Fitness",
     );
     assert.match(shareSiteDescription(initialEvent), /\$10/);
-    assert.match(shareSiteDescription(initialEvent), /October 17/);
-    assert.match(shareEventTitle(initialEvent), /Oct 17/);
+    assert.match(shareSiteDescription(initialEvent), /November 21/);
+    assert.match(shareEventTitle(initialEvent), /Nov 21/);
     const root = siteShareMetadata(initialEvent);
     assert.equal(root.openGraph?.url, "https://www.bigmamafit.ca/");
     assert.equal(root.openGraph?.siteName, "Big Mama Fitness");

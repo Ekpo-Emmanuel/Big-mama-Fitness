@@ -6,20 +6,21 @@ import {
   adminButton,
   adminSecondary,
 } from "@/components/admin-ui";
+import { publicPageError } from "@/lib/admin-error";
 export default function AdminError({
-  retry,
+  error,
+  reset,
 }: {
   error: Error & { digest?: string };
-  retry: () => void;
+  reset: () => void;
 }) {
   return (
     <AdminPage title="Unable to load this page">
       <EmptyState title="Your event information is temporarily unavailable">
-        Check your connection and try again. Your saved information is
-        unchanged.
+        {publicPageError(error)}
       </EmptyState>
       <div className="mt-5 flex flex-wrap gap-3">
-        <button onClick={retry} className={adminButton}>
+        <button type="button" onClick={() => reset()} className={adminButton}>
           Try again
         </button>
         <Link className={adminSecondary} href="/admin">

@@ -40,7 +40,7 @@ function reportProductionTimes() {
   );
   console.log("\n=== Real event send times (production constants) ===");
   console.log(
-    `Event: Saturday, October 17, 2026 · 5:00 PM–6:30 PM · ${initialEvent.timezone}`,
+    `Event: Saturday, November 21, 2026 · 5:30 PM–6:30 PM · ${initialEvent.timezone}`,
   );
   for (const [label, ms] of [
     ["24h reminder", instants.reminder_24],

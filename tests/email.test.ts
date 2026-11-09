@@ -277,7 +277,8 @@ test("confirmation copy includes event facts and calendar; organizers all receiv
   })!;
   assert.match(confirmation.subject, /You're in/);
   assert.match(confirmation.text, /Test/);
-  assert.match(confirmation.text, /Saturday, October 17, 2026/);
+  assert.match(confirmation.text, /Saturday, November 21, 2026/);
+  assert.match(confirmation.text, /5:30/);
   assert.match(confirmation.text, /1969 Boxwood Rd/);
   assert.match(confirmation.text, /water bottle/);
   assert.match(confirmation.text, /calendar\.google\.com/);
@@ -297,7 +298,7 @@ test("confirmation copy includes event facts and calendar; organizers all receiv
   assert.deepEqual(organizer.to, ["a@example.com", "b@example.com"]);
   assert.match(organizer.subject, /Test Guest/);
   assert.match(organizer.text, /guest@example.com/);
-  assert.match(organizer.text, /4 \/ 20/);
+  assert.match(organizer.text, /4 \/ 15/);
   assert.match(organizer.text, /Registered: 26\/09\/2026 at 05:00am/);
   assert.match(organizer.html, /Registered/);
   assert.match(organizer.html, /26\/09\/2026 at 05:00am/);
@@ -311,16 +312,20 @@ test("calendar links use Pacific wall time and a public ICS file", () => {
   assert.equal(google.searchParams.get("ctz"), "America/Vancouver");
   assert.equal(
     google.searchParams.get("dates"),
-    "20261018T000000Z/20261018T013000Z",
+    "20261122T013000Z/20261122T023000Z",
   );
   assert.equal(google.searchParams.get("text"), initialEvent.name);
+  assert.match(google.searchParams.get("location") || "", /Studio 1/);
   assert.match(google.searchParams.get("location") || "", /1969 Boxwood Rd/);
   assert.equal(google.searchParams.get("details")?.includes("@"), false);
   const ics = eventCalendarIcs(initialEvent);
-  assert.match(ics, /DTSTART;TZID=America\/Vancouver:20261017T170000/);
-  assert.match(ics, /DTEND;TZID=America\/Vancouver:20261017T183000/);
+  assert.match(ics, /DTSTART;TZID=America\/Vancouver:20261121T173000/);
+  assert.match(ics, /DTEND;TZID=America\/Vancouver:20261121T183000/);
   assert.match(ics, /SUMMARY:Afro Dance Fitness Nanaimo/);
-  assert.match(ics, /LOCATION:1969 Boxwood Rd\\, Nanaimo\\, BC V9S 5X9/);
+  assert.match(
+    ics,
+    /LOCATION:Studio 1\\, 1969 Boxwood Rd\\, Nanaimo\\, BC V9S 5X9/,
+  );
   assert.match(ics, /TZID:America\/Vancouver/);
   assert.match(ics, /COMMENT:With Brenda/);
   assert.match(ics, /METHOD:PUBLISH/);
@@ -495,8 +500,8 @@ test("templates stay free of internal ids and include calendar plus location", (
     assert.match(mail.html, /max-width:560px/);
   }
   assert.match(confirmation.html, /calendar\.google\.com/);
-  assert.match(confirmation.text, /Saturday, October 17, 2026/);
-  assert.match(confirmation.text, /5:00/);
+  assert.match(confirmation.text, /Saturday, November 21, 2026/);
+  assert.match(confirmation.text, /5:30/);
   assert.match(confirmation.text, /6:30/);
   assert.match(reminder3.text, /1969 Boxwood Rd/);
   assert.match(followup.text, /Rate the class/);

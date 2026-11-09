@@ -19,6 +19,8 @@ import {
   adminPanel,
   formatAmount,
 } from "@/components/admin-ui";
+import { SetFeaturedButton } from "@/components/admin-new-event-form";
+import { AdminDeleteEventButton } from "@/components/admin-delete-event";
 export default async function Overview({
   params,
 }: {
@@ -46,9 +48,16 @@ export default async function Overview({
       title="Event overview"
       description={`${eventDateFull(event)} · ${eventTime(event)}–${eventTime(event, event.endsAt)}`}
       actions={
-        <Link href={`${root}/check-in`} className={adminButton}>
-          Start check-in
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <SetFeaturedButton eventId={event.id} />
+          <AdminDeleteEventButton event={event} />
+          <Link href="/admin/new" className={adminSecondary}>
+            Create event
+          </Link>
+          <Link href={`${root}/check-in`} className={adminButton}>
+            Start check-in
+          </Link>
+        </div>
       }
     >
       <div className="mb-5 rounded-2xl bg-lilac/40 p-5 sm:p-6">

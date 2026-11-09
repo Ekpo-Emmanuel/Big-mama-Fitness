@@ -60,7 +60,8 @@ export const eventConfigSchema = z
       e.workoutEndsAt,
       e.endsAt,
     ].map(Date.parse);
-    if (times.some((t, i) => i > 0 && t <= times[i - 1]))
+    // Allow equal adjacent times (doors == workout start, workout end == event end).
+    if (times.some((t, i) => i > 0 && t < times[i - 1]))
       ctx.addIssue({
         code: "custom",
         message: "Schedule must be in chronological order.",

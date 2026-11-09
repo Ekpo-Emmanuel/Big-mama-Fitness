@@ -25,6 +25,8 @@ import {
   formatDate,
 } from "@/components/admin-ui";
 import { eventDateFull, eventTime } from "@/lib/event";
+import { AdminEditEventForm } from "@/components/admin-edit-event-form";
+import { AdminDeleteEventButton } from "@/components/admin-delete-event";
 
 type FeedbackSummary = {
   count: number;
@@ -134,23 +136,18 @@ export default async function EventView({
           </Link>
         </section>
         <section className={`${adminPanel} lg:col-span-2`}>
-          <h2 className="text-lg font-semibold">Approved waiver</h2>
+          <h2 className="text-lg font-semibold">Edit event</h2>
           <p className="mt-2 text-sm text-ink/70">
-            Accepted copies remain attached to each guest’s registration.
+            Changes apply to the public page and new checkouts. Guests who already
+            paid keep their original waiver copy.
           </p>
-          <details className="mt-3">
-            <summary className="cursor-pointer py-3 text-sm font-semibold">
-              Read current waiver · {event.waiverVersion || "Not configured"}
-            </summary>
-            <p className="max-h-80 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed">
-              {event.waiverText || "No waiver configured."}
-            </p>
-          </details>
+          <div className="mt-5">
+            <AdminEditEventForm event={event} />
+          </div>
+          <div className="mt-5">
+            <AdminDeleteEventButton event={event} />
+          </div>
         </section>
-        <p className="text-sm leading-relaxed text-ink/70 lg:col-span-2">
-          Need to change event information? Contact your site administrator.
-          These details are read-only here to protect existing bookings.
-        </p>
       </div>
     );
   } else if (view === "feedback") {

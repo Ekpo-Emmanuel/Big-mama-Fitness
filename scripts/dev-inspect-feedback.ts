@@ -27,7 +27,7 @@ async function main() {
 
   for (const key of [
     "followup-email-probe",
-    "afro-oct-2026",
+    "afro-nov-2026",
     "afro-dance-fitness",
   ]) {
     const event = await client.query(api.events.get, { key });

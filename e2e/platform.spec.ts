@@ -185,7 +185,7 @@ test("admin auth, export, and one-tap check-in", async ({ page, request }) => {
 test("endpoint protections and SEO", async ({ request }) => {
   expect(
     (
-      await request.post("/api/events/afro-oct-2026/checkout", {
+      await request.post("/api/events/afro-nov-2026/checkout", {
         data: {},
         headers: { origin: "https://wrong.example" },
       })

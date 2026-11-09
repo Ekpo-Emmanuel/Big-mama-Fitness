@@ -8,8 +8,8 @@ export function ConfirmationRefresh({ pending }: { pending: boolean }) {
     let attempts = 0;
     const timer = setInterval(() => {
       router.refresh();
-      if (++attempts >= 20) clearInterval(timer);
-    }, 3000);
+      if (++attempts >= 10) clearInterval(timer);
+    }, 4000);
     return () => clearInterval(timer);
   }, [pending, router]);
   return null;
