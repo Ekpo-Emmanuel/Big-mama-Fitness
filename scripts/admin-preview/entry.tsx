@@ -45,7 +45,7 @@ async function render() {
   else if (path[1] === "error")
     content = await AdminLayout({
       children: (
-        <ErrorPage error={new Error("test")} retry={() => location.reload()} />
+        <ErrorPage error={new Error("test")} reset={() => location.reload()} />
       ),
     });
   else if (path.length <= 1)
